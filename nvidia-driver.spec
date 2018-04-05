@@ -425,7 +425,11 @@ fi ||:
 %postun NVML -p /sbin/ldconfig
 
 %files
+%if 0%{?rhel} == 6
+%doc LICENSE
+%else
 %license LICENSE
+%endif
 %doc NVIDIA_Changelog README.txt html
 %dir %{_sysconfdir}/nvidia
 %{_bindir}/nvidia-bug-report.sh
