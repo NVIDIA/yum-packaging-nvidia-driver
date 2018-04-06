@@ -42,10 +42,11 @@ Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
 URL:            http://www.nvidia.com/object/unix.html
-ExclusiveArch:  %{ix86} x86_64
+ExclusiveArch:  %{ix86} x86_64 ppc64le
 
 Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
+Source2:        %{name}-%{version}-ppc64le.tar.xz
 # For servers up to 1.19.0-3
 Source10:       99-nvidia-modules.conf
 # For servers from 1.16 to 1.19.0-3
@@ -69,6 +70,7 @@ Source50:       nvidia-fallback.service
 Source51:       95-nvidia-fallback.preset
 
 Source99:       nvidia-generate-tarballs.sh
+Source100:      nvidia-generate-tarballs-ppc64le.sh
 
 BuildRequires:  python
 
@@ -86,7 +88,9 @@ Requires:       grubby
 Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-kmod = %{?epoch:%{epoch}:}%{version}
 Provides:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
+%ifnarch ppc64le
 Requires:       libva-vdpau-driver%{?_isa}
+%endif
 
 %if 0%{?fedora}
 Requires:       vulkan-filesystem
@@ -131,7 +135,9 @@ version %{version}.
 %package libs
 Summary:        Libraries for %{name}
 Requires(post): ldconfig
+%ifnarch ppc64le
 Requires:       libvdpau%{?_isa} >= 0.5
+%endif
 Requires:       libglvnd%{?_isa} >= 0.2
 Requires:       libglvnd-egl%{?_isa} >= 0.2
 Requires:       libglvnd-gles%{?_isa} >= 0.2
@@ -237,13 +243,20 @@ such as OpenGL headers.
 %setup -q -T -b 1 -n %{name}-%{version}-x86_64
 %endif
 
+%ifarch ppc64le
+%setup -q -T -b 2 -n %{name}-%{version}-ppc64le
+%endif
+
 # Create symlinks for shared objects
 ldconfig -vn .
 
+%ifnarch ppc64le
 # Required for building gstreamer 1.0 NVENC plugins
 ln -sf libnvidia-encode.so.%{version} libnvidia-encode.so
 # Required for building ffmpeg 3.1 Nvidia CUVID
 ln -sf libnvcuvid.so.%{version} libnvcuvid.so
+%endif
+
 # Required for building against CUDA
 ln -sf libcuda.so.%{version} libcuda.so
 # libglvnd indirect entry point
@@ -352,8 +365,11 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 install -p -m 644 %{SOURCE21} %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
 # Unique libraries
-cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}%{_libdir}/
+cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* %{buildroot}%{_libdir}/
+%ifnarch ppc64le
+cp -a libnvcuvid.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
+%endif
 
 %if 0%{?diagnostic}
 install -m 0755 -d %{buildroot}/usr/share/nvidia/diagnostic
@@ -490,20 +506,26 @@ fi ||:
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
+%ifnarch ppc64le
 %{_libdir}/libnvidia-glvkspirv.so.%{version}
+%endif
 %{_libdir}/libnvidia-tls.so.%{version}
+%ifnarch ppc64le
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
+%endif
 
 %files cuda-libs
 %{_libdir}/libcuda.so
 %{_libdir}/libcuda.so.1
 %{_libdir}/libcuda.so.%{version}
+%ifnarch ppc64le
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
 %{_libdir}/libnvidia-compiler.so.%{version}
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
+%endif
 %{_libdir}/libnvidia-fatbinaryloader.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
@@ -516,10 +538,12 @@ fi ||:
 %endif
 
 %files NvFBCOpenGL
+%ifnarch ppc64le
 %{_libdir}/libnvidia-fbc.so.1
 %{_libdir}/libnvidia-fbc.so.%{version}
 %{_libdir}/libnvidia-ifr.so.1
 %{_libdir}/libnvidia-ifr.so.%{version}
+%endif
 
 %files NVML
 %{_libdir}/libnvidia-ml.so.1
@@ -527,8 +551,10 @@ fi ||:
 
 %files devel
 %{_includedir}/nvidia/
+%ifnarch ppc64le
 %{_libdir}/libnvcuvid.so
 %{_libdir}/libnvidia-encode.so
+%endif
 
 %changelog
 * Thu Mar 15 2018 Simone Caronni <negativo17@gmail.com> - 3:390.42-1
