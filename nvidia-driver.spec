@@ -295,9 +295,6 @@ mkdir -p %{buildroot}%{_unitdir}
 mkdir -p %{buildroot}%{_presetdir}
 %endif
 
-# Headers
-install -p -m 0644 *.h %{buildroot}%{_includedir}/nvidia/GL/
-
 # OpenCL config
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
