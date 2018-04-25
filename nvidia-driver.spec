@@ -347,7 +347,7 @@ install -p -m 0644 %{SOURCE12} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvi
 
 # X stuff
 install -p -m 0755 nvidia_drv.so %{buildroot}%{_libdir}/xorg/modules/drivers/
-install -p -m 0755 libglx.so.%{version} %{buildroot}%{_libdir}/nvidia/xorg/libglx.so
+install -p -m 0755 libglxserver_nvidia.so.%{version} %{buildroot}%{_libdir}/nvidia/xorg/libglxserver_nvidia.so
 
 # NVIDIA specific configuration files
 install -p -m 0644 nvidia-application-profiles-%{version}-key-documentation \
