@@ -273,7 +273,6 @@ mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 mkdir -p %{buildroot}%{_datadir}/nvidia/
 mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
-mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/nvidia/xorg/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
@@ -547,7 +546,6 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %files devel
-%{_includedir}/nvidia/
 %ifnarch ppc64le
 %{_libdir}/libnvcuvid.so
 %{_libdir}/libnvidia-encode.so
