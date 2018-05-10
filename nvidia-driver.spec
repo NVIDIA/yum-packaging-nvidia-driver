@@ -112,15 +112,16 @@ Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.19.0-3
 %{?systemd_requires}
 %endif
 
+Provides:       cuda-drivers
+Provides:       nvidia-drivers
+Obsoletes:      xorg-x11-drv-nvidia
 Conflicts:      catalyst-x11-drv
 Conflicts:      catalyst-x11-drv-legacy
-Conflicts:      cuda-drivers
 Conflicts:      fglrx-x11-drv
 Conflicts:      nvidia-x11-drv
 Conflicts:      nvidia-x11-drv-173xx
 Conflicts:      nvidia-x11-drv-304xx
 Conflicts:      nvidia-x11-drv-340xx
-Conflicts:      xorg-x11-drv-nvidia
 Conflicts:      xorg-x11-drv-nvidia-173xx
 Conflicts:      xorg-x11-drv-nvidia-304xx
 Conflicts:      xorg-x11-drv-nvidia-340xx
@@ -148,13 +149,13 @@ Requires:       libglvnd-opengl%{?_isa} >= 0.2
 Requires:       egl-wayland
 %endif
 
+Provides:       xorg-x11-drv-nvidia-libs
 Conflicts:      nvidia-x11-drv-libs
 Conflicts:      nvidia-x11-drv-libs-96xx
 Conflicts:      nvidia-x11-drv-libs-173xx
 Conflicts:      nvidia-x11-drv-libs-304xx
 Conflicts:      nvidia-x11-drv-libs-340xx
 Conflicts:      xorg-x11-drv-nvidia-gl
-Conflicts:      xorg-x11-drv-nvidia-libs
 Conflicts:      xorg-x11-drv-nvidia-libs-173xx
 Conflicts:      xorg-x11-drv-nvidia-libs-304xx
 Conflicts:      xorg-x11-drv-nvidia-libs-340xx
@@ -171,7 +172,7 @@ This package provides the shared libraries for %{name}.
 
 %package cuda
 Summary:        CUDA integration for %{name}
-Conflicts:      xorg-x11-drv-nvidia-cuda
+Obsoletes:      xorg-x11-drv-nvidia-cuda
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
 Requires:       opencl-filesystem
@@ -221,14 +222,13 @@ to be a platform for building 3rd party applications.
 
 %package devel
 Summary:        Development files for %{name}
-Conflicts:      xorg-x11-drv-nvidia-devel
+Obsoletes:      xorg-x11-drv-nvidia-devel
 Conflicts:      xorg-x11-drv-nvidia-devel-173xx
 Conflicts:      xorg-x11-drv-nvidia-devel-304xx
 Conflicts:      xorg-x11-drv-nvidia-devel-340xx
 Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       cuda-nvml-devel%{?_isa} >= 1:9.1.85
 
 %description devel
 This package provides the development files of the %{name} package,
