@@ -149,13 +149,13 @@ Requires:       libglvnd-opengl%{?_isa} >= 0.2
 Requires:       egl-wayland
 %endif
 
-Provides:       xorg-x11-drv-nvidia-libs
+Obsoletes:      xorg-x11-drv-nvidia-gl
+Obsoletes:      xorg-x11-drv-nvidia-libs
 Conflicts:      nvidia-x11-drv-libs
 Conflicts:      nvidia-x11-drv-libs-96xx
 Conflicts:      nvidia-x11-drv-libs-173xx
 Conflicts:      nvidia-x11-drv-libs-304xx
 Conflicts:      nvidia-x11-drv-libs-340xx
-Conflicts:      xorg-x11-drv-nvidia-gl
 Conflicts:      xorg-x11-drv-nvidia-libs-173xx
 Conflicts:      xorg-x11-drv-nvidia-libs-304xx
 Conflicts:      xorg-x11-drv-nvidia-libs-340xx
@@ -173,6 +173,7 @@ This package provides the shared libraries for %{name}.
 %package cuda
 Summary:        CUDA integration for %{name}
 Obsoletes:      xorg-x11-drv-nvidia-cuda
+Obsoletes:      xorg-x11-drv-nvidia-cuda-libs
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
 Requires:       opencl-filesystem
