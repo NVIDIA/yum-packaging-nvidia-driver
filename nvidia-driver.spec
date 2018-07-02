@@ -505,6 +505,9 @@ fi ||:
 %{_libdir}/libnvidia-glsi.so.%{version}
 %ifnarch ppc64le
 %{_libdir}/libnvidia-glvkspirv.so.%{version}
+# Raytracing
+%{_libdir}/libnvidia-cbl.so.%{version}
+%{_libdir}/libnvidia-rtcore.so.%{version}
 %endif
 %{_libdir}/libnvidia-tls.so.%{version}
 %ifnarch ppc64le
