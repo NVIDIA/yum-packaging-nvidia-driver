@@ -112,7 +112,6 @@ Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.19.0-3
 %{?systemd_requires}
 %endif
 
-Provides:       cuda-drivers
 Provides:       nvidia-drivers
 Obsoletes:      xorg-x11-drv-nvidia
 Conflicts:      catalyst-x11-drv
