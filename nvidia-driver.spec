@@ -365,6 +365,7 @@ cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* %{buildroot}%{_libdir}/
 %ifnarch ppc64le
 cp -a libnvcuvid.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
+cp -a libnvoptix.so* %{buildroot}%{_libdir}/
 %endif
 
 %if 0%{?diagnostic}
@@ -507,6 +508,8 @@ fi ||:
 # Raytracing
 %{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
+%{_libdir}/libnvoptix.so.1
+%{_libdir}/libnvoptix.so.%{version}
 %endif
 %{_libdir}/libnvidia-tls.so.%{version}
 %ifnarch ppc64le
