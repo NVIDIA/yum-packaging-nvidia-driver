@@ -250,9 +250,10 @@ such as OpenGL headers.
 # Create symlinks for shared objects
 ldconfig -vn .
 
-%ifnarch ppc64le
 # Required for building gstreamer 1.0 NVENC plugins
 ln -sf libnvidia-encode.so.%{version} libnvidia-encode.so
+
+%ifnarch ppc64le
 # Required for building ffmpeg 3.1 Nvidia CUVID
 ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 %endif
@@ -525,9 +526,9 @@ fi ||:
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
 %{_libdir}/libnvidia-compiler.so.%{version}
+%endif
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
-%endif
 %{_libdir}/libnvidia-fatbinaryloader.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
@@ -554,8 +555,8 @@ fi ||:
 %files devel
 %ifnarch ppc64le
 %{_libdir}/libnvcuvid.so
-%{_libdir}/libnvidia-encode.so
 %endif
+%{_libdir}/libnvidia-encode.so
 
 %changelog
 * Thu Mar 15 2018 Simone Caronni <negativo17@gmail.com> - 3:390.42-1
