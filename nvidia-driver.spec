@@ -371,8 +371,8 @@ install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 # Unique libraries
 cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
 cp -a libnvcuvid.so* %{buildroot}%{_libdir}/
-%ifnarch ppc64le
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
+%ifnarch ppc64le
 cp -a libnvoptix.so* %{buildroot}%{_libdir}/
 %endif
 
@@ -530,15 +530,13 @@ fi ||:
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
+%endif
 %if 0%{?fedora} || 0%{?rhel} >= 7
 %{_libdir}/libnvidia-glvkspirv.so.%{version}
 %endif
-%endif
 %{_libdir}/libnvidia-tls.so.%{version}
-%ifnarch ppc64le
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
-%endif
 
 %files cuda-libs
 %{_libdir}/libcuda.so
