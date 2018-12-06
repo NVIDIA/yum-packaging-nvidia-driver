@@ -439,6 +439,7 @@ fi ||:
 %systemd_postun nvidia-fallback.service
 %endif
 
+%if 0%{?fedora} >= 28
 %ldconfig_scriptlets libs
 
 %ldconfig_scriptlets cuda-libs
@@ -446,6 +447,24 @@ fi ||:
 %ldconfig_scriptlets NvFBCOpenGL
 
 %ldconfig_scriptlets NVML
+
+%else
+%post libs -p /sbin/ldconfig
+
+%postun libs -p /sbin/ldconfig
+
+%post cuda-libs -p /sbin/ldconfig
+
+%postun cuda-libs -p /sbin/ldconfig
+
+%post NvFBCOpenGL -p /sbin/ldconfig
+
+%postun NvFBCOpenGL -p /sbin/ldconfig
+
+%post NVML -p /sbin/ldconfig
+
+%postun NVML -p /sbin/ldconfig
+%endif
 
 %files
 %if 0%{?rhel} == 6
