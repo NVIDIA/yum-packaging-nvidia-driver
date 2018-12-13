@@ -13,7 +13,7 @@
 %endif
 
 %if 0%{?rhel} == 7
-%global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau nvidia-drm.modeset=1
+%global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
@@ -26,14 +26,14 @@
 # configuration is enough to load the whole Nvidia stack or the Mesa one.
 %if 0%{?fedora} == 27 || 0%{?fedora} == 28
 %global _dracutopts     rd.driver.blacklist=nouveau
-%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0 nvidia-drm.modeset=1
+%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 %endif
 
 %if 0%{?fedora} >= 29 || 0%{?rhel} >= 8
-%global _dracutopts     rd.driver.blacklist=nouveau nvidia-drm.modeset=1
+%global _dracutopts     rd.driver.blacklist=nouveau
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
