@@ -264,6 +264,14 @@ ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 
 # Required for building against CUDA
 ln -sf libcuda.so.%{version} libcuda.so
+
+# Required for building additional applications agains the driver stack
+ln -sf libnvidia-cfg.so.%{version}              libnvidia-cfg.so
+ln -sf libnvidia-ml.so.%{version}               libnvidia-ml.so
+ln -sf libnvidia-ptxjitcompiler.so.%{version}   libnvidia-ptxjitcompiler.so
+ln -sf libnvidia-ifr.so.%{version}              libnvidia-ifr.so
+ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
+
 # libglvnd indirect entry point
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 
@@ -512,6 +520,11 @@ fi ||:
 %{_includedir}/nvidia/
 %{_libdir}/libnvcuvid.so
 %{_libdir}/libnvidia-encode.so
+%{_libdir}/libnvidia-cfg.so
+%{_libdir}/libnvidia-ml.so
+%{_libdir}/libnvidia-ptxjitcompiler.so
+%{_libdir}/libnvidia-ifr.so
+%{_libdir}/libnvidia-fbc.so
 
 %files libs
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
