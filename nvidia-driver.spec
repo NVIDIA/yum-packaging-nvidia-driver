@@ -1,15 +1,18 @@
 %global debug_package %{nil}
 %global __strip /bin/true
 
+%global _basename nvidia-driver
+
+%define _named_version %{driver_branch}
+
 # RHEL 6 does not have _udevrulesdir defined
 %if 0%{?rhel} == 6
 %global _udevrulesdir   %{_prefix}/lib/udev/rules.d/
 %global _dracutopts     nouveau.modeset=0 rdblacklist=nouveau
 %global _dracutopts_rm  nomodeset vga=normal
-%global _dracut_conf_d	%{_sysconfdir}/dracut.conf.d
+%global _dracut_conf_d  %{_sysconfdir}/dracut.conf.d
 %global _modprobe_d     %{_sysconfdir}/modprobe.d/
 %global _grubby         /sbin/grubby --grub --update-kernel=ALL
-%global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
 
 %if 0%{?rhel} == 7
@@ -18,40 +21,35 @@
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
+%endif
+
+# Don't disable nouveau at boot. Just matching the driver with OutputClass in
+# the X.org configuration is enough to load the whole Nvidia stack or the Mesa
+# one:
+%if 0%{?fedora} || 0%{?rhel} >= 8
+%global _dracutopts     rd.driver.blacklist=nouveau
+%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0 nvidia-drm.modeset=1
+%global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
+%global _modprobe_d     %{_prefix}/lib/modprobe.d/
+%global _grubby         %{_sbindir}/grubby --update-kernel=ALL
+%endif
+
+%if 0%{?rhel}
 %global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
 
-# Fallback service where it tries to load nouveau if nvidia is not loaded, so
-# don't disable it. Just matching the driver with OutputClass in the X.org
-# configuration is enough to load the whole Nvidia stack or the Mesa one.
-%if 0%{?fedora} == 27 || 0%{?fedora} == 28
-%global _dracutopts     rd.driver.blacklist=nouveau
-%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0
-%global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
-%global _modprobe_d     %{_prefix}/lib/modprobe.d/
-%global _grubby         %{_sbindir}/grubby --update-kernel=ALL
-%endif
-
-%if 0%{?fedora} >= 29 || 0%{?rhel} >= 8
-%global _dracutopts     rd.driver.blacklist=nouveau
-%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0
-%global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
-%global _modprobe_d     %{_prefix}/lib/modprobe.d/
-%global _grubby         %{_sbindir}/grubby --update-kernel=ALL
-%endif
-
-Name:           nvidia-driver
+Name:           %{_basename}-%{_named_version}
 Version:        410.73
-Release:        4%{?dist}
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
 URL:            http://www.nvidia.com/object/unix.html
 ExclusiveArch:  %{ix86} x86_64 ppc64le
 
-Source0:        %{name}-%{version}-i386.tar.xz
-Source1:        %{name}-%{version}-x86_64.tar.xz
-Source2:        %{name}-%{version}-ppc64le.tar.xz
+Source0:        %{_basename}-%{version}-i386.tar.xz
+Source1:        %{_basename}-%{version}-x86_64.tar.xz
+Source2:        %{_basename}-%{version}-ppc64le.tar.xz
 # For servers without OutputClass device options
 Source10:       99-nvidia-modules.conf
 Source11:       10-nvidia-driver.conf
@@ -67,16 +65,16 @@ Source24:       99-nvidia-dracut.conf
 Source40:       com.nvidia.driver.metainfo.xml
 Source41:       parse-readme.py
 
-# Auto-fallback to nouveau, requires server 1.19.0-3+, glvnd enabled mesa
-Source50:       nvidia-fallback.service
-Source51:       95-nvidia-fallback.preset
-
 Source99:       nvidia-generate-tarballs.sh
 Source100:      nvidia-generate-tarballs-ppc64le.sh
 
 %ifarch x86_64
 
+%if 0%{?rhel} == 8
+BuildRequires:  platform-python
+%else
 BuildRequires:  python2
+%endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
 # UDev rule location (_udevrulesdir) and systemd macros
@@ -90,28 +88,54 @@ BuildRequires:  libappstream-glib%{?_isa} >= 0.6.3
 
 %endif
 
+# All subpackages
+Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       %{name}-cuda%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       %{name}-NVML%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       %{name}-devel%{?_isa} = %{?epoch:%{epoch}:}%{version}
+
+
+Requires:       nvidia-settings-%{_named_version}%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       nvidia-modprobe-%{_named_version}%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       nvidia-xconfig-%{_named_version}%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       nvidia-libXNVCtrl-%{_named_version}%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       nvidia-libXNVCtrl-%{_named_version}-devel%{?_isa} = %{?epoch:%{epoch}:}%{version}
+
 Requires:       grubby
-Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
-Requires:       nvidia-kmod = %{?epoch:%{epoch}:}%{version}
-Provides:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
-%ifnarch ppc64le
-Requires:       libva-vdpau-driver%{?_isa}
-%endif
 
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
 # X.org "OutputClass"
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
 %endif
 
-%if 0%{?fedora} || 0%{?rhel} >= 8
+%if 0%{?fedora}
 # Extended "OutputClass" with device options
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.19.0-3
-# For auto-fallback to nouveau systemd service
-%{?systemd_requires}
 %endif
 
-Provides:       nvidia-drivers
-Obsoletes:      xorg-x11-drv-nvidia
+%if 0%{?is_dkms} == 1
+Requires:       kmod-nvidia-latest-dkms = %{?epoch:%{epoch}:}%{version}
+%else
+Requires:       nvidia-kmod = %{?epoch:%{epoch}:}%{version}
+Provides:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
+%endif
+
+Provides:       nvidia-driver = %{?epoch:%{epoch}:}%{version}-%{release}
+Provides:       nvidia-driver%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Conflicts:      nvidia-driver < %{version}
+Conflicts:      nvidia-driver > %{version}
+%if 0%{?is_dkms} == 1 || 0%{?is_latest} == 0
+Conflicts:      nvidia-driver-latest
+%else
+Obsoletes:      nvidia-driver
+%endif
+
+Obsoletes:      cuda-drivers
+Provides:       cuda-drivers = %{version}
+Provides:       nvidia-drivers = %{version}
+
 Conflicts:      catalyst-x11-drv
 Conflicts:      catalyst-x11-drv-legacy
 Conflicts:      fglrx-x11-drv
@@ -120,6 +144,7 @@ Conflicts:      nvidia-x11-drv-173xx
 Conflicts:      nvidia-x11-drv-304xx
 Conflicts:      nvidia-x11-drv-340xx
 Conflicts:      nvidia-x11-drv-390xx
+Obsoletes:      xorg-x11-drv-nvidia
 Conflicts:      xorg-x11-drv-nvidia-173xx
 Conflicts:      xorg-x11-drv-nvidia-304xx
 Conflicts:      xorg-x11-drv-nvidia-340xx
@@ -143,24 +168,28 @@ Requires:       libglvnd-egl%{?_isa} >= 1.0
 Requires:       libglvnd-gles%{?_isa} >= 1.0
 Requires:       libglvnd-glx%{?_isa} >= 1.0
 Requires:       libglvnd-opengl%{?_isa} >= 1.0
+Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
 
-%if 0%{?fedora} || 0%{?rhel} >= 8
+%if 0%{?fedora} >= 25 || 0%{?rhel} >= 8
 Requires:       egl-wayland
 Requires:       vulkan-loader
 %endif
 
-%if 0%{?rhel} == 7
+%if 0%{?fedora} || 0%{?rhel} >= 7
 Requires:       vulkan-filesystem
 %endif
 
-Obsoletes:      xorg-x11-drv-nvidia-gl
-Obsoletes:      xorg-x11-drv-nvidia-libs
+Provides:       %{_basename}-libs = %{?epoch:%{epoch}:}%{version}-%{release}
+Obsoletes:      %{_basename}-libs < %{?epoch:%{epoch}:}%{version}-%{release}
+
 Conflicts:      nvidia-x11-drv-libs
 Conflicts:      nvidia-x11-drv-libs-96xx
 Conflicts:      nvidia-x11-drv-libs-173xx
 Conflicts:      nvidia-x11-drv-libs-304xx
 Conflicts:      nvidia-x11-drv-libs-340xx
 Conflicts:      nvidia-x11-drv-libs-390xx
+Obsoletes:      xorg-x11-drv-nvidia-gl
+Obsoletes:      xorg-x11-drv-nvidia-libs
 Conflicts:      xorg-x11-drv-nvidia-libs-173xx
 Conflicts:      xorg-x11-drv-nvidia-libs-304xx
 Conflicts:      xorg-x11-drv-nvidia-libs-340xx
@@ -180,13 +209,16 @@ This package provides the shared libraries for %{name}.
 %package cuda-libs
 Summary:        Libraries for %{name}-cuda
 Requires(post): ldconfig
+Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
+
+Provides:       %{_basename}-cuda-libs = %{?epoch:%{epoch}:}%{version}-%{release}
+Obsoletes:      %{_basename}-cuda-libs < %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description cuda-libs
 This package provides the CUDA libraries for %{name}-cuda.
 
 %package diagnostic
 Summary:        Diagnostic utilities for %{name}
-Requires:       nvidia-kmod = %{?epoch:%{epoch}:}%{version}
 
 %description diagnostic
 This package provides the diagnostic utilities for for %{name}.
@@ -195,7 +227,11 @@ This package provides the diagnostic utilities for for %{name}.
 Summary:        NVIDIA OpenGL-based Framebuffer Capture libraries
 Requires(post): ldconfig
 # Loads libnvidia-encode.so at runtime
-Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
+
+Provides:       %{_basename}-NvFBCOpenGL = %{?epoch:%{epoch}:}%{version}-%{release}
+Obsoletes:      %{_basename}-NvFBCOpenGL < %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description NvFBCOpenGL
 This library provides a high performance, low latency interface to capture and
@@ -206,7 +242,10 @@ remote graphics scenarios.
 %package NVML
 Summary:        NVIDIA Management Library (NVML)
 Requires(post): ldconfig
+Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Provides:       cuda-nvml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Provides:       %{_basename}-NVML = %{?epoch:%{epoch}:}%{version}-%{release}
+Obsoletes:      %{_basename}-NVML < %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description NVML
 A C-based API for monitoring and managing various states of the NVIDIA GPU
@@ -216,6 +255,19 @@ and the SDK provides the appropriate header, stub libraries and sample
 applications. Each new version of NVML is backwards compatible and is intended
 to be a platform for building 3rd party applications.
 
+%package cuda
+Summary:        CUDA integration for %{name}
+Conflicts:      xorg-x11-drv-nvidia-cuda
+Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       nvidia-persistenced-%{_named_version} = %{?epoch:%{epoch}:}%{version}
+
+Provides:       %{_basename}-cuda = %{?epoch:%{epoch}:}%{version}-%{release}
+Obsoletes:      %{_basename}-cuda < %{?epoch:%{epoch}:}%{version}-%{release}
+
+%description cuda
+This package provides the CUDA integration components for %{name}.
+
 %package devel
 Summary:        Development files for %{name}
 Obsoletes:      xorg-x11-drv-nvidia-devel
@@ -223,35 +275,28 @@ Conflicts:      xorg-x11-drv-nvidia-devel-173xx
 Conflicts:      xorg-x11-drv-nvidia-devel-304xx
 Conflicts:      xorg-x11-drv-nvidia-devel-340xx
 Conflicts:      xorg-x11-drv-nvidia-devel-390xx
-Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}
+
+Provides:       %{_basename}-devel = %{?epoch:%{epoch}:}%{version}-%{release}
+Obsoletes:      %{_basename}-devel < %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description devel
 This package provides the development files of the %{name} package.
-
-%package cuda
-Summary:        CUDA integration for %{name}
-Conflicts:      xorg-x11-drv-nvidia-cuda
-Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
-Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
-Requires:       opencl-filesystem
-Requires:       ocl-icd
-
-%description cuda
-This package provides the CUDA integration components for %{name}.
  
 %prep
 %ifarch %{ix86}
-%setup -q -n %{name}-%{version}-i386
+%setup -q -n %{_basename}-%{version}-i386
 %endif
 
 %ifarch x86_64
-%setup -q -T -b 1 -n %{name}-%{version}-x86_64
+%setup -q -T -b 1 -n %{_basename}-%{version}-x86_64
 %endif
 
 %ifarch ppc64le
-%setup -q -T -b 2 -n %{name}-%{version}-ppc64le
+%setup -q -T -b 2 -n %{_basename}-%{version}-ppc64le
 %endif
 
 # Create symlinks for shared objects
@@ -339,9 +384,6 @@ fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
-# install auto-fallback to nouveau service
-install -p -m 0644 %{SOURCE50} %{buildroot}%{_unitdir}
-install -p -m 0644 %{SOURCE51} %{buildroot}%{_presetdir}
 %endif
 
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
@@ -396,14 +438,6 @@ install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
-# Apply the systemd preset for nvidia-fallback.service when upgrading from
-# a version without nvidia-fallback.service, as %%systemd_post only does this
-# on fresh installs
-%if 0%{?fedora}
-%triggerun -- %{name} < 2:381.22-2
-systemctl --no-reload preset nvidia-fallback.service >/dev/null 2>&1 || :
-%endif
-
 %post
 %{_grubby} --args='%{_dracutopts}' &>/dev/null
 %if 0%{?fedora} || 0%{?rhel} >= 7
@@ -425,9 +459,6 @@ if [ "$1" -eq "2" ]; then
     sed -i -e "s|$param ||g" %{_sysconfdir}/default/grub
   done
 fi || :
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%systemd_post nvidia-fallback.service
-%endif
 
 %preun
 if [ "$1" -eq "0" ]; then
@@ -438,14 +469,6 @@ if [ "$1" -eq "0" ]; then
   done
 %endif
 fi ||:
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%systemd_preun nvidia-fallback.service
-%endif
-
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%postun
-%systemd_postun nvidia-fallback.service
-%endif
 
 %if 0%{?fedora} >= 28
 %ldconfig_scriptlets libs
@@ -485,8 +508,6 @@ fi ||:
 %{_bindir}/nvidia-bug-report.sh
 %if 0%{?fedora}
 %{_datadir}/appdata/com.nvidia.driver.metainfo.xml
-%{_unitdir}/nvidia-fallback.service
-%{_presetdir}/95-nvidia-fallback.preset
 %endif
 %{_datadir}/nvidia
 %{_dracut_conf_d}/99-nvidia-dracut.conf
