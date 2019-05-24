@@ -219,6 +219,13 @@ This package provides the CUDA libraries for %{name}-cuda.
 
 %package diagnostic
 Summary:        Diagnostic utilities for %{name}
+Provides:       nvidia-driver-diagnostic = %{?epoch:%{epoch}:}%{version}
+
+#%if 0%{?is_dkms} == 1
+#Requires:       kmod-nvidia-latest-dkms = %{?epoch:%{epoch}:}%{version}
+#%else
+#Requires:       nvidia-kmod = %{?epoch:%{epoch}:}%{version}
+#%endif
 
 %description diagnostic
 This package provides the diagnostic utilities for for %{name}.
