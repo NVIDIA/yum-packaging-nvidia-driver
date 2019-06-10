@@ -1,35 +1,6 @@
 %global debug_package %{nil}
 %global __strip /bin/true
 
-%if 0%{?rhel} == 6
-%global _glvnd_libdir   %{_libdir}/libglvnd
-%global _udevrulesdir   %{_prefix}/lib/udev/rules.d/
-%global _dracutopts     nouveau.modeset=0 rdblacklist=nouveau
-%global _dracutopts_rm  nomodeset vga=normal
-%global _dracut_conf_d  %{_sysconfdir}/dracut.conf.d
-%global _modprobe_d     %{_sysconfdir}/modprobe.d/
-%global _grubby         /sbin/grubby --grub --update-kernel=ALL
-%endif
-
-%if 0%{?rhel} == 7
-%global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau
-%global _dracutopts_rm  nomodeset gfxpayload=vga=normal
-%global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
-%global _modprobe_d     %{_prefix}/lib/modprobe.d/
-%global _grubby         %{_sbindir}/grubby --update-kernel=ALL
-%endif
-
-# Don't disable nouveau at boot. Just matching the driver with OutputClass in
-# the X.org configuration is enough to load the whole Nvidia stack or the Mesa
-# one:
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%global _dracutopts     rd.driver.blacklist=nouveau
-%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0 nvidia-drm.modeset=1
-%global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
-%global _modprobe_d     %{_prefix}/lib/modprobe.d/
-%global _grubby         %{_sbindir}/grubby --update-kernel=ALL
-%endif
-
 %if 0%{?rhel}
 %global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
@@ -76,7 +47,6 @@ BuildRequires:  libappstream-glib%{?_isa} >= 0.6.3
 
 Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
-Requires:       grubby
 
 %if 0%{?rhel} >= 8
 Requires:       dnf-plugin-nvidia
@@ -271,6 +241,8 @@ mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
 
+%ifarch x86_64
+
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
@@ -278,9 +250,6 @@ mkdir -p %{buildroot}%{_libdir}/xorg/modules/extensions/
 mkdir -p %{buildroot}%{_mandir}/man1/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
-mkdir -p %{buildroot}%{_udevrulesdir}
-mkdir -p %{buildroot}%{_modprobe_d}/
-mkdir -p %{buildroot}%{_dracut_conf_d}/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
 %if 0%{?rhel}
@@ -289,21 +258,10 @@ mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 mkdir -p %{buildroot}%{_datadir}/appdata/
-mkdir -p %{buildroot}%{_unitdir}
-mkdir -p %{buildroot}%{_presetdir}
 %endif
 
 # OpenCL config
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
-
-# Blacklist nouveau
-install -p -m 0644 %{SOURCE20} %{buildroot}%{_modprobe_d}/
-
-# Autoload nvidia-uvm module after nvidia module
-install -p -m 0644 %{SOURCE23} %{buildroot}%{_modprobe_d}/
-
-# dracut.conf.d file, nvidia modules must never be in the initrd
-install -p -m 0644 %{SOURCE24} %{buildroot}%{_dracut_conf_d}/
 
 # Binaries
 install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh} %{buildroot}%{_bindir}
@@ -343,10 +301,7 @@ install -p -m 0644 nvidia-application-profiles-%{version}-key-documentation \
 install -p -m 0644 nvidia-application-profiles-%{version}-rc \
     %{buildroot}%{_datadir}/nvidia/
 
-# UDev rules:
-# https://github.com/NVIDIA/nvidia-modprobe/blob/master/modprobe-utils/nvidia-modprobe-utils.h#L33-L46
-# https://github.com/negativo17/nvidia-driver/issues/27
-install -p -m 644 %{SOURCE21} %{SOURCE22} %{buildroot}%{_udevrulesdir}
+%endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
 # Vulkan and EGL loaders
@@ -369,40 +324,7 @@ install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
-%post
-%{_grubby} --args='%{_dracutopts}' &>/dev/null
-%if 0%{?fedora} || 0%{?rhel} >= 7
-. %{_sysconfdir}/default/grub
-if [ -z "${GRUB_CMDLINE_LINUX}" ]; then
-  echo GRUB_CMDLINE_LINUX="%{_dracutopts}" >> %{_sysconfdir}/default/grub
-else
-  for param in %{_dracutopts}; do
-    echo ${GRUB_CMDLINE_LINUX} | grep -q $param
-    [ $? -eq 1 ] && GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX} ${param}"
-  done
-  sed -i -e "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"${GRUB_CMDLINE_LINUX}\"|g" %{_sysconfdir}/default/grub
-fi
-%endif
-if [ "$1" -eq "2" ]; then
-  # Remove no longer needed options
-  %{_grubby} --remove-args='%{_dracutopts_rm}' &>/dev/null
-  for param in %{_dracutopts_rm}; do
-    sed -i -e "s|$param ||g" %{_sysconfdir}/default/grub
-  done
-fi || :
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%systemd_post nvidia-fallback.service
-%endif
 
-%preun
-if [ "$1" -eq "0" ]; then
-  %{_grubby} --remove-args='%{_dracutopts}' &>/dev/null
-%if 0%{?fedora} || 0%{?rhel} >= 7
-  for param in %{_dracutopts}; do
-    sed -i -e "s|$param ||g" %{_sysconfdir}/default/grub
-  done
-%endif
-fi ||:
 
 %if 0%{?fedora} >= 28 || 0%{?rhel} >= 8
 %ldconfig_scriptlets libs
@@ -468,8 +390,6 @@ fi ||:
 %{_bindir}/nvidia-smi
 %{_mandir}/man1/nvidia-cuda-mps-control.1.*
 %{_mandir}/man1/nvidia-smi.*
-%{_modprobe_d}/nvidia-uvm.conf
-%{_udevrulesdir}/60-nvidia-uvm.rules
 
 %files devel
 %{_includedir}/nvidia/
