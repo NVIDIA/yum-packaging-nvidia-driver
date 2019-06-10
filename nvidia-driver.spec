@@ -366,11 +366,8 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %endif
 %{_datadir}/nvidia
-%{_dracut_conf_d}/99-nvidia-dracut.conf
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
-%{_modprobe_d}/nvidia.conf
-%{_udevrulesdir}/60-nvidia-drm.rules
 
 # X.org configuration files
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
