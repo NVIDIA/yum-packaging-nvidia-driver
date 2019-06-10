@@ -3,6 +3,35 @@
 
 %if 0%{?rhel} == 6
 %global _glvnd_libdir   %{_libdir}/libglvnd
+%global _udevrulesdir   %{_prefix}/lib/udev/rules.d/
+%global _dracutopts     nouveau.modeset=0 rdblacklist=nouveau
+%global _dracutopts_rm  nomodeset vga=normal
+%global _dracut_conf_d  %{_sysconfdir}/dracut.conf.d
+%global _modprobe_d     %{_sysconfdir}/modprobe.d/
+%global _grubby         /sbin/grubby --grub --update-kernel=ALL
+%endif
+
+%if 0%{?rhel} == 7
+%global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau
+%global _dracutopts_rm  nomodeset gfxpayload=vga=normal
+%global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
+%global _modprobe_d     %{_prefix}/lib/modprobe.d/
+%global _grubby         %{_sbindir}/grubby --update-kernel=ALL
+%endif
+
+# Don't disable nouveau at boot. Just matching the driver with OutputClass in
+# the X.org configuration is enough to load the whole Nvidia stack or the Mesa
+# one:
+%if 0%{?fedora} || 0%{?rhel} >= 8
+%global _dracutopts     rd.driver.blacklist=nouveau
+%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0 nvidia-drm.modeset=1
+%global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
+%global _modprobe_d     %{_prefix}/lib/modprobe.d/
+%global _grubby         %{_sbindir}/grubby --update-kernel=ALL
+%endif
+
+%if 0%{?rhel}
+%global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
 
 Name:           nvidia-driver
@@ -22,6 +51,12 @@ Source10:       99-nvidia-modules.conf
 Source11:       10-nvidia-driver.conf
 # For servers with OutputClass device options
 Source12:       10-nvidia.conf
+
+Source20:       nvidia.conf
+Source21:       60-nvidia-drm.rules
+Source22:       60-nvidia-uvm.rules
+Source23:       nvidia-uvm.conf
+Source24:       99-nvidia-dracut.conf
 
 Source40:       com.nvidia.driver.metainfo.xml
 Source41:       parse-readme.py
@@ -47,6 +82,7 @@ BuildRequires:  libappstream-glib%{?_isa} >= 0.6.3
 
 Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
+Requires:       grubby
 
 %if 0%{?rhel} >= 8
 Requires:       dnf-plugin-nvidia
@@ -87,6 +123,7 @@ version %{version}.
 
 %package libs
 Summary:        Libraries for %{name}
+Requires(post): ldconfig
 %ifnarch ppc64le
 Requires:       libvdpau%{?_isa} >= 0.5
 %endif
@@ -101,7 +138,7 @@ Requires:       egl-wayland%{?_isa}
 Requires:       vulkan-loader
 %endif
 
-%if 0%{?rhel} == 7
+%if 0%{?fedora} || 0%{?rhel} == 7
 Requires:       vulkan-filesystem
 %ifarch x86_64
 Requires:       egl-wayland%{?_isa}
@@ -136,6 +173,7 @@ This package provides the shared libraries for %{name}.
 
 %package cuda-libs
 Summary:        Libraries for %{name}-cuda
+Requires(post): ldconfig
 
 %description cuda-libs
 This package provides the CUDA libraries for %{name}-cuda.
@@ -153,8 +191,9 @@ remote graphics scenarios.
 
 %package NVML
 Summary:        NVIDIA Management Library (NVML)
-Provides:       cuda-nvml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires(post): ldconfig
 Requires:       nvidia-driver%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Provides:       cuda-nvml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description NVML
 A C-based API for monitoring and managing various states of the NVIDIA GPU
@@ -163,6 +202,17 @@ nvidia-smi. The run-time version of NVML ships with the NVIDIA display driver,
 and the SDK provides the appropriate header, stub libraries and sample
 applications. Each new version of NVML is backwards compatible and is intended
 to be a platform for building 3rd party applications.
+
+%package cuda
+Summary:        CUDA integration for %{name}
+Conflicts:      xorg-x11-drv-nvidia-cuda
+Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
+Requires:       opencl-filesystem
+Requires:       ocl-icd
+
+%description cuda
+This package provides the CUDA integration components for %{name}.
 
 %package devel
 Summary:        Development files for %{name}
@@ -177,17 +227,6 @@ Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{re
 
 %description devel
 This package provides the development files of the %{name} package.
-
-%package cuda
-Summary:        CUDA integration for %{name}
-Conflicts:      xorg-x11-drv-nvidia-cuda
-Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
-Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
-Requires:       opencl-filesystem
-Requires:       ocl-icd
-
-%description cuda
-This package provides the CUDA integration components for %{name}.
  
 %prep
 %ifarch %{ix86}
@@ -238,8 +277,6 @@ mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
 
-%ifarch x86_64
-
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
@@ -247,6 +284,9 @@ mkdir -p %{buildroot}%{_libdir}/xorg/modules/extensions/
 mkdir -p %{buildroot}%{_mandir}/man1/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
+mkdir -p %{buildroot}%{_udevrulesdir}
+mkdir -p %{buildroot}%{_modprobe_d}/
+mkdir -p %{buildroot}%{_dracut_conf_d}/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
 %if 0%{?rhel}
@@ -255,10 +295,21 @@ mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 mkdir -p %{buildroot}%{_datadir}/appdata/
+mkdir -p %{buildroot}%{_unitdir}
+mkdir -p %{buildroot}%{_presetdir}
 %endif
 
 # OpenCL config
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
+
+# Blacklist nouveau
+install -p -m 0644 %{SOURCE20} %{buildroot}%{_modprobe_d}/
+
+# Autoload nvidia-uvm module after nvidia module
+install -p -m 0644 %{SOURCE23} %{buildroot}%{_modprobe_d}/
+
+# dracut.conf.d file, nvidia modules must never be in the initrd
+install -p -m 0644 %{SOURCE24} %{buildroot}%{_dracut_conf_d}/
 
 # Binaries
 install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh} %{buildroot}%{_bindir}
@@ -298,7 +349,10 @@ install -p -m 0644 nvidia-application-profiles-%{version}-key-documentation \
 install -p -m 0644 nvidia-application-profiles-%{version}-rc \
     %{buildroot}%{_datadir}/nvidia/
 
-%endif
+# UDev rules:
+# https://github.com/NVIDIA/nvidia-modprobe/blob/master/modprobe-utils/nvidia-modprobe-utils.h#L33-L46
+# https://github.com/negativo17/nvidia-driver/issues/27
+install -p -m 644 %{SOURCE21} %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
 # Vulkan and EGL loaders
@@ -315,13 +369,11 @@ cp -a libnvoptix.so* %{buildroot}%{_libdir}/
 %endif
 
 # libglvnd indirect entry point and private libglvnd libraries
-%if 0%{?rhel} == 6
+%if 0%{?rhel} == 6 || 0%{?rhel} == 7
 cp -a libGLX_indirect.so* %{buildroot}%{_libdir}/
 install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
-
-%if 0%{?fedora}
 
 %post
 %{_grubby} --args='%{_dracutopts}' &>/dev/null
@@ -357,14 +409,6 @@ if [ "$1" -eq "0" ]; then
   done
 %endif
 fi ||:
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%systemd_preun nvidia-fallback.service
-%endif
-
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%postun
-%systemd_postun nvidia-fallback.service
-%endif
 
 %if 0%{?fedora} >= 28 || 0%{?rhel} >= 8
 %ldconfig_scriptlets libs
@@ -406,8 +450,11 @@ fi ||:
 %{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %endif
 %{_datadir}/nvidia
+%{_dracut_conf_d}/99-nvidia-dracut.conf
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
+%{_modprobe_d}/nvidia.conf
+%{_udevrulesdir}/60-nvidia-drm.rules
 
 # X.org configuration files
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
@@ -427,8 +474,8 @@ fi ||:
 %{_bindir}/nvidia-smi
 %{_mandir}/man1/nvidia-cuda-mps-control.1.*
 %{_mandir}/man1/nvidia-smi.*
-
-%endif
+%{_modprobe_d}/nvidia-uvm.conf
+%{_udevrulesdir}/60-nvidia-uvm.rules
 
 %files devel
 %{_includedir}/nvidia/
@@ -441,7 +488,7 @@ fi ||:
 %{_libdir}/libnvidia-fbc.so
 
 %files libs
-%if 0%{?rhel} == 6
+%if 0%{?rhel} == 6 || 0%{?rhel} == 7
 %{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %{_libdir}/libGLX_indirect.so.0
 %endif
@@ -459,8 +506,6 @@ fi ||:
 %{_libdir}/libGLX_nvidia.so.%{version}
 %ifarch x86_64
 %{_libdir}/libnvidia-cbl.so.%{version}
-%{_libdir}/libnvidia-cfg.so.1
-%{_libdir}/libnvidia-cfg.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
@@ -470,7 +515,6 @@ fi ||:
 %{_libdir}/libnvidia-cfg.so.%{version}
 %endif
 %{_libdir}/libnvidia-eglcore.so.%{version}
-%{_libdir}/libnvidia-fatbinaryloader.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
 %ifnarch ppc64le
@@ -498,6 +542,7 @@ fi ||:
 %endif
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
+%{_libdir}/libnvidia-fatbinaryloader.so.%{version}
 %{_libdir}/libnvidia-opticalflow.so.1
 %{_libdir}/libnvidia-opticalflow.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
