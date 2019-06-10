@@ -52,12 +52,6 @@ Source11:       10-nvidia-driver.conf
 # For servers with OutputClass device options
 Source12:       10-nvidia.conf
 
-Source20:       nvidia.conf
-Source21:       60-nvidia-drm.rules
-Source22:       60-nvidia-uvm.rules
-Source23:       nvidia-uvm.conf
-Source24:       99-nvidia-dracut.conf
-
 Source40:       com.nvidia.driver.metainfo.xml
 Source41:       parse-readme.py
 
