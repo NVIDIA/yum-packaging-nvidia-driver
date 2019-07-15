@@ -420,11 +420,6 @@ cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 cp -a libnvoptix.so* %{buildroot}%{_libdir}/
 %endif
 
-%if 0%{?diagnostic}
-install -m 0755 -d %{buildroot}/usr/share/nvidia/diagnostic
-install -p -m 0655 diagnostic/libnvvs-diagnostic* %{buildroot}/usr/share/nvidia/diagnostic
-%endif
-
 # libglvnd indirect entry point and private libglvnd libraries
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
 cp -a libGLX_indirect.so* %{buildroot}%{_libdir}/
