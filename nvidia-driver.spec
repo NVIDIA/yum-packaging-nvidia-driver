@@ -96,12 +96,13 @@ Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}-NVML%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}-devel%{?_isa} = %{?epoch:%{epoch}:}%{version}
 
-
 Requires:       nvidia-settings-%{_named_version}%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-modprobe-%{_named_version}%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-xconfig-%{_named_version}%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-libXNVCtrl-%{_named_version}%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-libXNVCtrl-%{_named_version}-devel%{?_isa} = %{?epoch:%{epoch}:}%{version}
+
+Requires:       yum-plugin-nvidia
 
 Requires:       grubby
 
@@ -132,7 +133,6 @@ Conflicts:      nvidia-driver-latest
 Obsoletes:      nvidia-driver
 %endif
 
-Obsoletes:      cuda-drivers
 Provides:       cuda-drivers = %{version}
 Provides:       nvidia-drivers = %{version}
 
@@ -144,7 +144,7 @@ Conflicts:      nvidia-x11-drv-173xx
 Conflicts:      nvidia-x11-drv-304xx
 Conflicts:      nvidia-x11-drv-340xx
 Conflicts:      nvidia-x11-drv-390xx
-Obsoletes:      xorg-x11-drv-nvidia
+Conflicts:      xorg-x11-drv-nvidia
 Conflicts:      xorg-x11-drv-nvidia-173xx
 Conflicts:      xorg-x11-drv-nvidia-304xx
 Conflicts:      xorg-x11-drv-nvidia-340xx
@@ -180,7 +180,7 @@ Requires:       vulkan-filesystem
 %endif
 
 Provides:       %{_basename}-libs = %{?epoch:%{epoch}:}%{version}-%{release}
-Obsoletes:      %{_basename}-libs < %{?epoch:%{epoch}:}%{version}-%{release}
+#Obsoletes:      %{_basename}-libs < %{?epoch:%{epoch}:}%{version}-%{release}
 
 Conflicts:      nvidia-x11-drv-libs
 Conflicts:      nvidia-x11-drv-libs-96xx
@@ -188,8 +188,8 @@ Conflicts:      nvidia-x11-drv-libs-173xx
 Conflicts:      nvidia-x11-drv-libs-304xx
 Conflicts:      nvidia-x11-drv-libs-340xx
 Conflicts:      nvidia-x11-drv-libs-390xx
-Obsoletes:      xorg-x11-drv-nvidia-gl
-Obsoletes:      xorg-x11-drv-nvidia-libs
+Conflicts:      xorg-x11-drv-nvidia-gl
+Conflicts:      xorg-x11-drv-nvidia-libs
 Conflicts:      xorg-x11-drv-nvidia-libs-173xx
 Conflicts:      xorg-x11-drv-nvidia-libs-304xx
 Conflicts:      xorg-x11-drv-nvidia-libs-340xx
@@ -212,23 +212,10 @@ Requires(post): ldconfig
 Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
 
 Provides:       %{_basename}-cuda-libs = %{?epoch:%{epoch}:}%{version}-%{release}
-Obsoletes:      %{_basename}-cuda-libs < %{?epoch:%{epoch}:}%{version}-%{release}
+#Obsoletes:      %{_basename}-cuda-libs < %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description cuda-libs
 This package provides the CUDA libraries for %{name}-cuda.
-
-%package diagnostic
-Summary:        Diagnostic utilities for %{name}
-Provides:       nvidia-driver-diagnostic = %{?epoch:%{epoch}:}%{version}
-
-#%if 0%{?is_dkms} == 1
-#Requires:       kmod-nvidia-latest-dkms = %{?epoch:%{epoch}:}%{version}
-#%else
-#Requires:       nvidia-kmod = %{?epoch:%{epoch}:}%{version}
-#%endif
-
-%description diagnostic
-This package provides the diagnostic utilities for for %{name}.
 
 %package NvFBCOpenGL
 Summary:        NVIDIA OpenGL-based Framebuffer Capture libraries
@@ -238,7 +225,7 @@ Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
 
 Provides:       %{_basename}-NvFBCOpenGL = %{?epoch:%{epoch}:}%{version}-%{release}
-Obsoletes:      %{_basename}-NvFBCOpenGL < %{?epoch:%{epoch}:}%{version}-%{release}
+#Obsoletes:      %{_basename}-NvFBCOpenGL < %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description NvFBCOpenGL
 This library provides a high performance, low latency interface to capture and
@@ -252,7 +239,7 @@ Requires(post): ldconfig
 Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Provides:       cuda-nvml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Provides:       %{_basename}-NVML = %{?epoch:%{epoch}:}%{version}-%{release}
-Obsoletes:      %{_basename}-NVML < %{?epoch:%{epoch}:}%{version}-%{release}
+#Obsoletes:      %{_basename}-NVML < %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description NVML
 A C-based API for monitoring and managing various states of the NVIDIA GPU
@@ -277,7 +264,7 @@ This package provides the CUDA integration components for %{name}.
 
 %package devel
 Summary:        Development files for %{name}
-Obsoletes:      xorg-x11-drv-nvidia-devel
+Conflicts:      xorg-x11-drv-nvidia-devel
 Conflicts:      xorg-x11-drv-nvidia-devel-173xx
 Conflicts:      xorg-x11-drv-nvidia-devel-304xx
 Conflicts:      xorg-x11-drv-nvidia-devel-340xx
@@ -288,7 +275,7 @@ Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}
 
 Provides:       %{_basename}-devel = %{?epoch:%{epoch}:}%{version}-%{release}
-Obsoletes:      %{_basename}-devel < %{?epoch:%{epoch}:}%{version}-%{release}
+#Obsoletes:      %{_basename}-devel < %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description devel
 This package provides the development files of the %{name} package.
@@ -616,11 +603,6 @@ fi ||:
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
-
-%if 0%{?diagnostic}
-%files diagnostic
-/usr/share/nvidia/diagnostic
-%endif
 
 %files NvFBCOpenGL
 %ifnarch ppc64le
