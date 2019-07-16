@@ -129,7 +129,9 @@ Conflicts:      nvidia-driver < %{version}
 Conflicts:      nvidia-driver > %{version}
 %if 0%{?is_dkms} == 1 || 0%{?is_latest} == 0
 Conflicts:      nvidia-driver-latest
-%else
+%endif
+
+%if 0%{?is_dkms} == 1
 Obsoletes:      nvidia-driver
 %endif
 
