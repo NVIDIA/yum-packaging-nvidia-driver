@@ -182,7 +182,10 @@ Requires:       vulkan-filesystem
 %endif
 
 Provides:       %{_basename}-libs = %{?epoch:%{epoch}:}%{version}-%{release}
-#Obsoletes:      %{_basename}-libs < %{?epoch:%{epoch}:}%{version}-%{release}
+
+%if 0%{?is_dkms} == 1
+Obsoletes:      %{_basename}-libs < %{?epoch:%{epoch}:}%{version}-%{release}
+%endif
 
 Conflicts:      nvidia-x11-drv-libs
 Conflicts:      nvidia-x11-drv-libs-96xx
@@ -214,7 +217,10 @@ Requires(post): ldconfig
 Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
 
 Provides:       %{_basename}-cuda-libs = %{?epoch:%{epoch}:}%{version}-%{release}
-#Obsoletes:      %{_basename}-cuda-libs < %{?epoch:%{epoch}:}%{version}-%{release}
+
+%if 0%{?is_dkms} == 1
+Obsoletes:      %{_basename}-cuda-libs < %{?epoch:%{epoch}:}%{version}-%{release}
+%endif
 
 %description cuda-libs
 This package provides the CUDA libraries for %{name}-cuda.
@@ -227,7 +233,10 @@ Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
 
 Provides:       %{_basename}-NvFBCOpenGL = %{?epoch:%{epoch}:}%{version}-%{release}
-#Obsoletes:      %{_basename}-NvFBCOpenGL < %{?epoch:%{epoch}:}%{version}-%{release}
+
+%if 0%{?is_dkms} == 1
+Obsoletes:      %{_basename}-NvFBCOpenGL < %{?epoch:%{epoch}:}%{version}-%{release}
+%endif
 
 %description NvFBCOpenGL
 This library provides a high performance, low latency interface to capture and
@@ -241,7 +250,10 @@ Requires(post): ldconfig
 Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Provides:       cuda-nvml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Provides:       %{_basename}-NVML = %{?epoch:%{epoch}:}%{version}-%{release}
-#Obsoletes:      %{_basename}-NVML < %{?epoch:%{epoch}:}%{version}-%{release}
+
+%if 0%{?is_dkms} == 1
+Obsoletes:      %{_basename}-NVML < %{?epoch:%{epoch}:}%{version}-%{release}
+%endif
 
 %description NVML
 A C-based API for monitoring and managing various states of the NVIDIA GPU
@@ -259,7 +271,10 @@ Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-persistenced-%{_named_version} = %{?epoch:%{epoch}:}%{version}
 
 Provides:       %{_basename}-cuda = %{?epoch:%{epoch}:}%{version}-%{release}
+
+%if 0%{?is_dkms} == 1
 Obsoletes:      %{_basename}-cuda < %{?epoch:%{epoch}:}%{version}-%{release}
+%endif
 
 %description cuda
 This package provides the CUDA integration components for %{name}.
@@ -277,7 +292,10 @@ Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}
 
 Provides:       %{_basename}-devel = %{?epoch:%{epoch}:}%{version}-%{release}
-#Obsoletes:      %{_basename}-devel < %{?epoch:%{epoch}:}%{version}-%{release}
+
+%if 0%{?is_dkms} == 1
+Obsoletes:      %{_basename}-devel < %{?epoch:%{epoch}:}%{version}-%{release}
+%endif
 
 %description devel
 This package provides the development files of the %{name} package.
