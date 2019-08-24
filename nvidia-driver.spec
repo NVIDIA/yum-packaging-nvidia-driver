@@ -96,11 +96,11 @@ Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}-NVML%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}-devel%{?_isa} = %{?epoch:%{epoch}:}%{version}
 
-Requires:       nvidia-settings-%{_named_version}%{?_isa} = %{?epoch:%{epoch}:}%{version}
+#Requires:       nvidia-settings%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-modprobe-%{_named_version}%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-xconfig-%{_named_version}%{?_isa} = %{?epoch:%{epoch}:}%{version}
-Requires:       nvidia-libXNVCtrl-%{_named_version}%{?_isa} = %{?epoch:%{epoch}:}%{version}
-Requires:       nvidia-libXNVCtrl-%{_named_version}-devel%{?_isa} = %{?epoch:%{epoch}:}%{version}
+#Requires:       nvidia-libXNVCtrl%{?_isa} = %{?epoch:%{epoch}:}%{version}
+#Requires:       nvidia-libXNVCtrl-devel%{?_isa} = %{?epoch:%{epoch}:}%{version}
 
 Requires:       yum-plugin-nvidia
 
