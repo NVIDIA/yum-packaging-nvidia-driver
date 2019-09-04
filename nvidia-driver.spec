@@ -326,7 +326,15 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 
 
 
-%if 0%{?fedora} >= 28 || 0%{?rhel} >= 8
+%if 0%{?fedora} || 0%{?rhel} >= 8
+%postun
+%systemd_postun nvidia-fallback.service
+%systemd_preun nvidia-hibernate.service
+%systemd_preun nvidia-resume.service
+%systemd_preun nvidia-suspend.service
+%endif
+
+%if 0%{?fedora} >= 28
 %ldconfig_scriptlets libs
 
 %ldconfig_scriptlets cuda-libs
@@ -441,6 +449,8 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-tls.so.%{version}
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
+%{_libdir}/libnvidia-allocator.so.1
+%{_libdir}/libnvidia-allocator.so.%{version}
 
 %files cuda-libs
 %{_libdir}/libcuda.so
