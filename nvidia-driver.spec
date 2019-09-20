@@ -226,11 +226,8 @@ ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
 # libglvnd indirect entry point
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 
-%if 0%{?fedora} || 0%{?rhel} >= 7
-cat nvidia_icd.json.template | sed -e 's/__NV_VK_ICD__/libGLX_nvidia.so.0/' > nvidia_icd.%{_target_cpu}.json
-%else
-rm -f libnvidia-glvkspirv.so.%{version}
-%endif
+cat nvidia_icd.json > nvidia_icd.%{_target_cpu}.json
+
 
 %build
 
@@ -303,10 +300,8 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 
 %endif
 
-%if 0%{?fedora} || 0%{?rhel} >= 7
 # Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
-%endif
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 
 # Unique libraries
