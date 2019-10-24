@@ -12,11 +12,12 @@ Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
 URL:            http://www.nvidia.com/object/unix.html
-ExclusiveArch:  %{ix86} x86_64 ppc64le
+ExclusiveArch:  %{ix86} x86_64 ppc64le aarch64
 
 Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
 Source2:        %{name}-%{version}-ppc64le.tar.xz
+Source3:        %{name}-%{version}-aarch64.tar.xz
 # For servers without OutputClass device options
 Source10:       99-nvidia-modules.conf
 Source11:       10-nvidia-driver.conf
@@ -28,8 +29,9 @@ Source41:       parse-readme.py
 
 Source99:       nvidia-generate-tarballs.sh
 Source100:      nvidia-generate-tarballs-ppc64le.sh
+Source101:      nvidia-generate-tarballs-aarch64.sh
 
-%ifarch x86_64
+%ifarch x86_64 aarch64
 
 %if 0%{?rhel} == 8
 BuildRequires:  platform-python
@@ -99,12 +101,14 @@ Requires:       libglvnd-opengl%{?_isa} >= 1.0
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 Requires:       egl-wayland%{?_isa}
+%ifnarch aarch64
 Requires:       vulkan-loader
+%endif
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} == 7
 Requires:       vulkan-filesystem
-%ifarch x86_64
+%ifarch x86_64 aarch64
 Requires:       egl-wayland%{?_isa}
 %endif
 %endif
@@ -171,7 +175,9 @@ to be a platform for building 3rd party applications.
 Summary:        CUDA integration for %{name}
 Conflicts:      xorg-x11-drv-nvidia-cuda
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
+%ifnarch aarch64
 Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
+%endif
 Requires:       opencl-filesystem
 Requires:       ocl-icd
 
@@ -203,6 +209,10 @@ This package provides the development files of the %{name} package.
 
 %ifarch ppc64le
 %setup -q -T -b 2 -n %{name}-%{version}-ppc64le
+%endif
+
+%ifarch aarch64
+%setup -q -T -b 3 -n %{name}-%{version}-aarch64
 %endif
 
 # Create symlinks for shared objects
@@ -238,7 +248,7 @@ mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
 
-%ifarch x86_64
+%ifarch x86_64 aarch64
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
@@ -308,7 +318,7 @@ install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
 cp -a libnvcuvid.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
-%ifnarch ppc64le
+%ifnarch ppc64le aarch64
 cp -a libnvoptix.so* %{buildroot}%{_libdir}/
 %endif
 
@@ -418,23 +428,27 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libGLESv2_nvidia.so.%{version}
 %{_libdir}/libGLX_nvidia.so.0
 %{_libdir}/libGLX_nvidia.so.%{version}
-%ifarch x86_64
+%ifarch x86_64 aarch64
 %{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
+%endif
+%ifarch x86_64
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
 %endif
-%ifarch x86_64 ppc64le
+%ifarch x86_64 ppc64le aarch64
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
 %endif
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
-%ifnarch ppc64le
+%ifarch x86_64 aarch64
 # Raytracing
 %{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
+%endif
+%ifarch x86_64
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
 %endif
@@ -453,23 +467,21 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libcuda.so.%{version}
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
-%ifnarch ppc64le
-%{_libdir}/libnvidia-compiler.so.%{version}
-%endif
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
-%{_libdir}/libnvidia-fatbinaryloader.so.%{version}
 %{_libdir}/libnvidia-opticalflow.so.1
 %{_libdir}/libnvidia-opticalflow.so.%{version}
+%ifnarch ppc64le aarch64
+%{_libdir}/libnvidia-compiler.so.%{version}
+%endif
+%{_libdir}/libnvidia-fatbinaryloader.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
-%{_libdir}/libnvidia-opticalflow.so.1
-%{_libdir}/libnvidia-opticalflow.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
 
 %files NvFBCOpenGL
-%ifnarch ppc64le
+%ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-fbc.so.1
 %{_libdir}/libnvidia-fbc.so.%{version}
 %{_libdir}/libnvidia-ifr.so.1
