@@ -31,7 +31,7 @@ Source99:       nvidia-generate-tarballs.sh
 Source100:      nvidia-generate-tarballs-ppc64le.sh
 Source101:      nvidia-generate-tarballs-aarch64.sh
 
-%ifarch x86_64 aarch64
+%ifarch x86_64 aarch64 ppc64le
 
 %if 0%{?rhel} == 8
 BuildRequires:  platform-python
@@ -101,14 +101,14 @@ Requires:       libglvnd-opengl%{?_isa} >= 1.0
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 Requires:       egl-wayland%{?_isa}
-%ifnarch aarch64
+%ifnarch aarch64 ppc64le
 Requires:       vulkan-loader
 %endif
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} == 7
 Requires:       vulkan-filesystem
-%ifarch x86_64 aarch64
+%ifarch x86_64 aarch64 ppc64le
 Requires:       egl-wayland%{?_isa}
 %endif
 %endif
@@ -248,7 +248,7 @@ mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
 
-%ifarch x86_64 aarch64
+%ifarch x86_64 aarch64 ppc64le
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
@@ -428,7 +428,7 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libGLESv2_nvidia.so.%{version}
 %{_libdir}/libGLX_nvidia.so.0
 %{_libdir}/libGLX_nvidia.so.%{version}
-%ifarch x86_64 aarch64
+%ifarch x86_64 aarch64 ppc64le
 %{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %endif
@@ -443,7 +443,7 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
-%ifarch x86_64 aarch64
+%ifarch x86_64 aarch64 ppc64le
 # Raytracing
 %{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
