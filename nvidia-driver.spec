@@ -230,8 +230,10 @@ ln -sf libcuda.so.%{version} libcuda.so
 ln -sf libnvidia-cfg.so.%{version}              libnvidia-cfg.so
 ln -sf libnvidia-ml.so.%{version}               libnvidia-ml.so
 ln -sf libnvidia-ptxjitcompiler.so.%{version}   libnvidia-ptxjitcompiler.so
+%ifnarch ppc64le aarch64
 ln -sf libnvidia-ifr.so.%{version}              libnvidia-ifr.so
 ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
+%endif
 
 # libglvnd indirect entry point
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
@@ -408,8 +410,10 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-cfg.so
 %{_libdir}/libnvidia-ml.so
 %{_libdir}/libnvidia-ptxjitcompiler.so
+%ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-ifr.so
 %{_libdir}/libnvidia-fbc.so
+%endif
 
 %files libs
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
