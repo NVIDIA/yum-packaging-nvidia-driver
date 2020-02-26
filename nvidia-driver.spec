@@ -574,6 +574,8 @@ fi ||:
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
+%{_libdir}/libnvidia-ngx.so.1
+%{_libdir}/libnvidia-ngx.so.%{version}
 %endif
 %ifarch x86_64 ppc64le
 %{_libdir}/libnvidia-cfg.so.1
