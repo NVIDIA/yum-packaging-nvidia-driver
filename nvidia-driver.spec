@@ -320,7 +320,7 @@ install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
 cp -a libnvcuvid.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
-%ifnarch ppc64le aarch64
+%ifnarch ppc64le
 cp -a libnvoptix.so* %{buildroot}%{_libdir}/
 %endif
 
@@ -414,6 +414,10 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-ifr.so
 %{_libdir}/libnvidia-fbc.so
 %endif
+%ifarch aarch64
+%{_libdir}/libnvidia-vgxcfg.so
+%{_libdir}/libnvidia-vgpu.so
+%endif
 
 %files libs
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
@@ -435,8 +439,6 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %ifarch x86_64 aarch64
 %{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
-%endif
-%ifarch x86_64
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
 %endif
@@ -451,12 +453,16 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 # Raytracing
 %{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
-%endif
-%ifarch x86_64
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
+%endif
+%ifarch x86_64
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
+%endif
+%ifarch aarch64
+%{_libdir}/libnvidia-vgxcfg.so.%{version}
+%{_libdir}/libnvidia-vgpu.so.%{version}
 %endif
 %if 0%{?fedora} || 0%{?rhel} >= 7
 %{_libdir}/libnvidia-glvkspirv.so.%{version}
