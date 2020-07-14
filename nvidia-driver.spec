@@ -269,6 +269,8 @@ Conflicts:      xorg-x11-drv-nvidia-cuda
 Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-persistenced-%{_named_version} = %{?epoch:%{epoch}:}%{version}
+Requires:       opencl-filesystem
+Requires:       ocl-icd
 
 Provides:       %{_basename}-cuda = %{?epoch:%{epoch}:}%{version}-%{release}
 
