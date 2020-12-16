@@ -314,7 +314,9 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 
 # gsp.bin
 install -m 0755 -d %{buildroot}/lib/firmware/nvidia/%{version}/
+%ifarch x86_64
 install -p -m 0644 firmware/gsp.bin %{buildroot}/lib/firmware/nvidia/%{version}/
+%endif
 
 # Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
