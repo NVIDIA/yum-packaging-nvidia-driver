@@ -314,9 +314,7 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 
 # gsp.bin
 install -m 0755 -d %{buildroot}/lib/firmware/nvidia/%{version}/
-%ifarch x86_64
 install -p -m 0644 firmware/gsp.bin %{buildroot}/lib/firmware/nvidia/%{version}/
-%endif
 
 # Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
@@ -389,7 +387,6 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_datadir}/nvidia
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
-/lib/firmware/nvidia/%{version}
 
 # X.org configuration files
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
