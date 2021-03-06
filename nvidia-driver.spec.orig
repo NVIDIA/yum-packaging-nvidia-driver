@@ -412,6 +412,11 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 - Update to 460.27.04.
 - Trim changelog.
 
+<<<<<<< HEAD
+* Mon Dec 07 2020 Simone Caronni <negativo17@gmail.com> - 3:450.80.02-2
+- Drop support for CentOS/RHEL 6.
+
+=======
 * Mon Dec 07 2020 Simone Caronni <negativo17@gmail.com> - 3:455.45.01-2
 - Drop support for CentOS/RHEL 6.
 
@@ -424,6 +429,7 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 * Mon Oct 12 2020 Simone Caronni <negativo17@gmail.com> - 3:455.28-1
 - Update to 455.28.
 
+>>>>>>> fedora-33
 * Tue Oct 06 2020 Simone Caronni <negativo17@gmail.com> - 3:450.80.02-1
 - Update to 450.80.02.
 
