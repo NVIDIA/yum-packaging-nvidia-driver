@@ -1,12 +1,12 @@
 #!/bin/sh
 set -e
 
-VERSION=${VERSION:-410.73}
+VERSION=${VERSION:-460.56}
 DL_SITE=${DL_SITE:-http://us.download.nvidia.com/XFree86}
 TEMP_UNPACK=${TEMP_UNPACK:-temp}
 
 PLATFORM=Linux-x86_64
-RUN_FILE=${RUN_FILE:-NVIDIA-${PLATFORM}-${VERSION}.run}
+RUN_FILE=NVIDIA-${PLATFORM}-${VERSION}.run
 
 printf "Downloading installer ${RUN_FILE}... "
 [[ -f $RUN_FILE ]] || wget -c -q ${DL_SITE}/${PLATFORM}/${VERSION}/$RUN_FILE
@@ -37,9 +37,6 @@ rm -f \
 
 # Useless with packages
 rm -f nvidia-installer* .manifest make* mk* tls_test*
-
-# useless on modern distributions
-rm -f libnvidia-wfb*
 
 # Add json files in both architectures
 cp -f *.json* 32/
