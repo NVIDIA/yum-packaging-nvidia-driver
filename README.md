@@ -16,7 +16,7 @@ The `main` branch contains this README. The `.spec`, `.conf`, and `.sh` files ca
 - [Prerequisites](#Prerequisites)
   * [Clone this git repository](#Clone-this-git-repository)
   * [Install build dependencies](#Install-build-dependencies)
-- [Related](#Other-NVIDIA-driver-packages)
+- [Related](#Related)
   * [DKMS nvidia](#DKMS-nvidia)
   * [NVIDIA kmod common](#NVIDIA-kmod-common)
   * [NVIDIA modprobe](#NVIDIA-modprobe)
@@ -25,6 +25,9 @@ The `main` branch contains this README. The `.spec`, `.conf`, and `.sh` files ca
   * [NVIDIA precompiled kmod](#NVIDIA-precompiled-kmod)
   * [NVIDIA settings](#NVIDIA-settings)
   * [NVIDIA xconfig](#NVIDIA-xconfig)
+- [See also](#See-also)
+  * [Ubuntu driver](#Ubuntu-driver)
+  * [SUSE driver](#SUSE-driver)
 - [Contributing](#Contributing)
 
 
@@ -151,6 +154,20 @@ yum install rpm-build
 
 - nvidia-xconfig
   * [https://github.com/NVIDIA/yum-packaging-nvidia-xconfig](https://github.com/NVIDIA/yum-packaging-nvidia-xconfig)
+
+
+## See also
+
+- negativo17
+  * [https://github.com/negativo17/nvidia-driver](https://github.com/negativo17/nvidia-driver)
+
+### Ubuntu driver
+
+  * [https://github.com/NVIDIA/ubuntu-packaging-nvidia-driver](https://github.com/NVIDIA/ubuntu-packaging-nvidia-driver)
+
+### SUSE driver
+
+  * [https://github.com/NVIDIA/zypper-packaging-nvidia-driver](https://github.com/NVIDIA/zypper-packaging-nvidia-driver)
 
 
 ## Contributing
