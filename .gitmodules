@@ -1,0 +1,39 @@
+[submodule "dkms-nvidia"]
+	path = yum-packaging-dkms-nvidia
+	url = https://github.com/NVIDIA/yum-packaging-dkms-nvidia
+	branch = rhel8
+
+[submodule "nvidia-kmod-common"]
+        path = yum-packaging-nvidia-kmod-common
+        url = https://github.com/NVIDIA/yum-packaging-nvidia-kmod-common
+        branch = rhel8
+
+[submodule "nvidia-modprobe"]
+        path = yum-packaging-nvidia-modprobe
+        url = https://github.com/NVIDIA/yum-packaging-nvidia-modprobe
+        branch = rhel8
+
+[submodule "nvidia-persistenced"]
+        path = yum-packaging-nvidia-persistenced
+        url = https://github.com/NVIDIA/yum-packaging-nvidia-persistenced
+        branch = rhel8
+
+[submodule "nvidia-plugin"]
+        path = yum-packaging-nvidia-plugin
+        url = https://github.com/NVIDIA/yum-packaging-nvidia-plugin
+        branch = rhel8
+
+[submodule "nvidia-precompiled-kmod"]
+        path = yum-packaging-nvidia-precompiled-kmod
+        url = https://github.com/NVIDIA/yum-packaging-nvidia-precompiled-kmod
+        branch = rhel8
+
+[submodule "nvidia-settings"]
+        path = yum-packaging-nvidia-settings
+        url = https://github.com/NVIDIA/yum-packaging-nvidia-settings
+        branch = rhel8
+
+[submodule "nvidia-xconfig"]
+        path = yum-packaging-nvidia-xconfig
+        url = https://github.com/NVIDIA/yum-packaging-nvidia-xconfig
+        branch = rhel8

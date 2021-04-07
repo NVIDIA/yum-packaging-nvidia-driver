@@ -39,7 +39,7 @@
 %endif
 
 Name:           %{_basename}-%{_named_version}
-Version:        410.73
+Version:        %{?version}%{?!version:430.14}
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -633,6 +633,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Tue Apr 06 2021 Kevin Mittman <kmittman@nvidia.com> - 3:460.00-1
+- Populate version using variable
+
 * Tue Oct 30 2018 Simone Caronni <negativo17@gmail.com> - 3:410.73-4
 - Disable modesetting on Fedora < 29.
 
