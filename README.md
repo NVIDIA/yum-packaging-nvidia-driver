@@ -16,6 +16,8 @@ The `main` branch contains this README. The `.spec`, `.conf`, and `.sh` files ca
 - [Prerequisites](#Prerequisites)
   * [Clone this git repository](#Clone-this-git-repository)
   * [Install build dependencies](#Install-build-dependencies)
+- [Building with script](#Building-with-script)
+- [Building Manually](#Building-Manually)
 - [Related](#Related)
   * [DKMS nvidia](#DKMS-nvidia)
   * [NVIDIA kmod common](#NVIDIA-kmod-common)
@@ -109,9 +111,111 @@ git clone -b ${branch} https://github.com/NVIDIA/yum-packaging-nvidia-driver
 ### Install build dependencies
 
 ```shell
+# Misc
+yum install libappstream-glib
 # Packaging
 yum install rpm-build
 ```
+
+## Building with script
+
+### Fetch script from `main` branch
+
+```shell
+cd yum-packaging-nvidia-driver
+git checkout remotes/origin/main -- build.sh
+```
+
+### Usage
+> _note:_ distro is `fedora33`, `rhel7`, `rhel8`
+
+```shell
+./build.sh path/to/*.run ${distro}
+> ex: time ./build.sh ~/Downloads/NVIDIA-Linux-x86_64-460.32.03.run rhel7
+```
+
+
+## Building Manually
+
+### Generate tarballs from runfile
+
+```shell
+version="460.32.03"
+export RUN_FILE="/path/to/NVIDIA-Linux-${arch}-${version}.run"
+export VERSION="$version"
+rm -rf temp
+nvidia-generate-tarballs-${arch}.sh
+ls *.tar.xz
+> nvidia-driver-${version}-${arch}.tar.xz  # x86_64 script does not have -${arch} suffix
+> nvidia-driver-${version}-i386.tar.xz     # 32-bit libraries for x86_64 only
+> nvidia-kmod-${version}-${arch}.tar.xz    # not used here
+```
+
+### Packaging (`dnf` distros)
+> note: `fedora` & `rhel8`-based distros
+
+```shell
+mkdir BUILD BUILDROOT RPMS SRPMS SOURCES SPECS
+cp *.conf SOURCES/
+cp nvidia-driver-${version}-${arch}.tar.xz SOURCES/
+cp nvidia-driver.spec SPECS/
+
+rpmbuild \
+    --define "%_topdir $(pwd)" \
+    --define "debug_package %{nil}" \
+    --define "version $version" \
+    --define "epoch 3" \
+    --target "${arch}" \
+    -v -bb SPECS/nvidia-driver.spec
+```
+
+### Packaging (`yum` distros)
+> note: `rhel7`-based distros
+
+```shell
+mkdir BUILD BUILDROOT RPMS SRPMS SOURCES SPECS
+cp *.rules SOURCES/
+cp *.conf SOURCES/
+cp nvidia-driver-${version}-${arch}.tar.xz SOURCES/
+cp nvidia-driver.spec SPECS/
+
+# latest-dkms
+rpmbuild \
+    --define "%_topdir $(pwd)" \
+    --define "debug_package %{nil}" \
+    --define "version $version" \
+    --define "'driver_branch latest-dkms'" \
+    --define "is_dkms 1" \
+    --define "is_latest 1" \
+    --define "epoch 3" \
+    --target "${arch}" \
+    -v -bb SPECS/nvidia-driver.spec
+
+# latest
+rpmbuild \
+    --define "%_topdir $(pwd)" \
+    --define "debug_package %{nil}" \
+    --define "version $version" \
+    --define "'driver_branch latest'" \
+    --define "is_dkms 0" \
+    --define "is_latest 1" \
+    --define "epoch 3" \
+    --target "${arch}" \
+    -v -bb SPECS/nvidia-driver.spec
+
+# branch-460
+rpmbuild \
+    --define "%_topdir $(pwd)" \
+    --define "debug_package %{nil}" \
+    --define "version $version" \
+    --define "'driver_branch branch-460'" \
+    --define "is_dkms 0" \
+    --define "is_latest 0" \
+    --define "epoch 3" \
+    --target "${arch}" \
+    -v -bb SPECS/nvidia-driver.spec
+```
+
 
 ## Related
 
