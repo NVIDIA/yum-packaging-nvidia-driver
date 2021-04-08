@@ -11,10 +11,10 @@ distro=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 
 drvname=$(basename "$runfile")
 arch=$(echo "$drvname" | awk -F "-" '{print $3}')
-version=$(echo "$drvname" | sed -e "s|NVIDIA\-Linux\-${arch}\-||" -e 's|\.run$||')
+version=$(echo "$drvname" | sed -e "s|NVIDIA\-Linux\-${arch}\-||" -e 's|\.run$||' -e 's|\-grid$||')
 drvbranch=$(echo "$version" | awk -F "." '{print $1}')
 
-tarball=nvidia-driver-${version}-${arch}
+tarball="nvidia-driver-${version}-${arch}"
 unpackDir="temp"
 
 err() { echo; echo "ERROR: $*"; exit 1; }
