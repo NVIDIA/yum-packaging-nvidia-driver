@@ -79,8 +79,8 @@ build_triple_rpm()
             --define "'debug_package %{nil}'" \
             --define "'version $version'" \
             --define "'driver_branch $flavor'" \
-            --define "is_dkms $is_dkms" \
-            --define "is_latest $is_latest" \
+            --define "'is_dkms $is_dkms'" \
+            --define "'is_latest $is_latest'" \
             --define "'epoch $epoch'" \
             --target "$arch" \
             -v -bb SPECS/nvidia-driver.spec

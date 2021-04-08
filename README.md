@@ -184,7 +184,7 @@ rpmbuild \
     --define "%_topdir $(pwd)" \
     --define "debug_package %{nil}" \
     --define "version $version" \
-    --define "'driver_branch latest-dkms'" \
+    --define "driver_branch latest-dkms" \
     --define "is_dkms 1" \
     --define "is_latest 1" \
     --define "epoch 3" \
@@ -196,7 +196,7 @@ rpmbuild \
     --define "%_topdir $(pwd)" \
     --define "debug_package %{nil}" \
     --define "version $version" \
-    --define "'driver_branch latest'" \
+    --define "driver_branch latest" \
     --define "is_dkms 0" \
     --define "is_latest 1" \
     --define "epoch 3" \
@@ -208,7 +208,7 @@ rpmbuild \
     --define "%_topdir $(pwd)" \
     --define "debug_package %{nil}" \
     --define "version $version" \
-    --define "'driver_branch branch-460'" \
+    --define "driver_branch branch-460" \
     --define "is_dkms 0" \
     --define "is_latest 0" \
     --define "epoch 3" \
