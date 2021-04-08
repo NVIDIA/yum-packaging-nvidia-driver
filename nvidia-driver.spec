@@ -45,11 +45,13 @@ Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
 URL:            http://www.nvidia.com/object/unix.html
-ExclusiveArch:  %{ix86} x86_64 ppc64le
+ExclusiveArch:  %{ix86} x86_64 ppc64le aarch64
 
 Source0:        %{_basename}-%{version}-i386.tar.xz
 Source1:        %{_basename}-%{version}-x86_64.tar.xz
 Source2:        %{_basename}-%{version}-ppc64le.tar.xz
+Source3:        %{_basename}-%{version}-aarch64.tar.xz
+
 # For servers without OutputClass device options
 Source10:       99-nvidia-modules.conf
 Source11:       10-nvidia-driver.conf
@@ -67,6 +69,7 @@ Source41:       parse-readme.py
 
 Source99:       nvidia-generate-tarballs.sh
 Source100:      nvidia-generate-tarballs-ppc64le.sh
+Source101:      nvidia-generate-tarballs-aarch64.sh
 
 %ifarch x86_64
 
@@ -162,7 +165,7 @@ version %{version}.
 %package libs
 Summary:        Libraries for %{name}
 Requires(post): ldconfig
-%ifnarch ppc64le
+%ifnarch ppc64le aarch64
 Requires:       libvdpau%{?_isa} >= 0.5
 %endif
 Requires:       libglvnd%{?_isa} >= 1.0
@@ -315,6 +318,10 @@ This package provides the development files of the %{name} package.
 %setup -q -T -b 2 -n %{_basename}-%{version}-ppc64le
 %endif
 
+%ifarch aarch64
+%setup -q -T -b 3 -n %{_basename}-%{version}-aarch64
+%endif
+
 # Create symlinks for shared objects
 ldconfig -vn .
 
@@ -337,7 +344,9 @@ ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 
 # Needed for vulkan
-cat nvidia_icd.json > nvidia_icd.%{_target_cpu}.json
+if [ ! -f nvidia_icd.%{_target_cpu}.json ] && [ -f nvidia_icd.json ]; then
+    cat nvidia_icd.json > nvidia_icd.%{_target_cpu}.json
+fi
 
 
 %build
@@ -579,7 +588,7 @@ fi ||:
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
 %endif
-%ifarch x86_64 ppc64le
+%ifarch x86_64 ppc64le aarch64
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
 %endif
@@ -608,7 +617,7 @@ fi ||:
 %{_libdir}/libcuda.so.%{version}
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
-%ifnarch ppc64le
+%ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-compiler.so.%{version}
 %endif
 %{_libdir}/libnvidia-encode.so.1
@@ -621,7 +630,7 @@ fi ||:
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
 
 %files NvFBCOpenGL
-%ifnarch ppc64le
+%ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-fbc.so.1
 %{_libdir}/libnvidia-fbc.so.%{version}
 %{_libdir}/libnvidia-ifr.so.1
@@ -633,6 +642,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Apr 08 2021 Kevin Mittman <kmittman@nvidia.com> - 3:460.00-1
+- Add unofficial aarch64 support for RHEL/CentOS 7
+
 * Tue Apr 06 2021 Kevin Mittman <kmittman@nvidia.com> - 3:460.00-1
 - Populate version using variable
 
