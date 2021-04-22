@@ -1,3 +1,5 @@
+%define fedora 0
+%define rhel 7
 %global debug_package %{nil}
 %global __strip /bin/true
 
@@ -266,6 +268,19 @@ and the SDK provides the appropriate header, stub libraries and sample
 applications. Each new version of NVML is backwards compatible and is intended
 to be a platform for building 3rd party applications.
 
+# GRID vGPU support
+%if 0%{?is_grid} == 1
+%package -n nvidia-grid-utils
+Summary:        NVIDIA driver GRID utilities
+Requires(post): ldconfig
+%endif
+
+%if 0%{?is_grid} == 1
+%description -n nvidia-grid-utils
+NVIDIA driver GRID utilities
+%endif
+
+
 %package cuda
 Summary:        CUDA integration for %{name}
 Conflicts:      xorg-x11-drv-nvidia-cuda
@@ -370,6 +385,19 @@ mkdir -p %{buildroot}%{_modprobe_d}/
 mkdir -p %{buildroot}%{_dracut_conf_d}/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
+%if 0%{?is_grid} == 1
+mkdir -p %{buildroot}%{_libdir}/nvidia/
+%if 0%{?rhel} >= 7 || 0%{?fedora}
+mkdir -p %{buildroot}%{_libdir}/nvidia/systemd/
+%endif
+%if 0%{?rhel} == 6
+mkdir -p %{buildroot}%{_libdir}/nvidia/sysv/
+%endif
+%ifarch x86_64
+mkdir -p %{buildroot}%{_libdir}/nvidia/gridd/
+%endif
+%endif
+
 %if 0%{?rhel}
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 %endif
@@ -452,6 +480,27 @@ cp -a libnvoptix.so* %{buildroot}%{_libdir}/
 cp -a libGLX_indirect.so* %{buildroot}%{_libdir}/
 install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
+%endif
+
+# GRID utility
+%if 0%{?is_grid} == 1
+cp -a gridd.conf.template %{buildroot}%{_sysconfdir}/nvidia/
+cp -a nvidia-gridd %{buildroot}%{_bindir}/
+%if 0%{?rhel} >= 7 || 0%{?fedora}
+cp -a init-scripts/systemd/nvidia-gridd.service %{buildroot}%{_libdir}/nvidia/systemd/
+%endif
+%if 0%{?rhel} == 6
+cp -a init-scripts/sysv/nvidia-gridd %{buildroot}%{_libdir}/nvidia/sysv/
+%endif
+%ifarch x86_64
+cp -a libFlxComm64.so.* %{buildroot}%{_libdir}/nvidia/gridd/
+cp -a libFlxCore64.so.* %{buildroot}%{_libdir}/nvidia/gridd/
+%endif
+cp -a init-scripts/common.sh %{buildroot}%{_libdir}/nvidia/
+cp -a init-scripts/post-install %{buildroot}%{_libdir}/nvidia/
+cp -a init-scripts/pre-uninstall %{buildroot}%{_libdir}/nvidia/
+cp -a nvidia-gridd.* %{buildroot}%{_mandir}/man1/
+cp -a grid-third-party-licenses.txt %{buildroot}%{_datadir}/nvidia/
 %endif
 
 %post
@@ -540,6 +589,27 @@ fi ||:
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
+%endif
+
+%if 0%{?is_grid} == 1
+%files -n nvidia-grid-utils
+%{_sysconfdir}/nvidia/gridd.conf.template
+%{_bindir}/nvidia-gridd
+%if 0%{?rhel} >= 7 || 0%{?fedora}
+%{_libdir}/nvidia/systemd/nvidia-gridd.service
+%endif
+%if 0%{?rhel} == 6
+%{_libdir}/nvidia/sysv/nvidia-gridd
+%endif
+%ifarch x86_64
+%{_libdir}/nvidia/gridd/libFlxComm64.so.*
+%{_libdir}/nvidia/gridd/libFlxCore64.so.*
+%endif
+%{_libdir}/nvidia/common.sh
+%{_libdir}/nvidia/post-install
+%{_libdir}/nvidia/pre-uninstall
+%{_mandir}/man1/nvidia-gridd.*
+%{_datadir}/nvidia/grid-third-party-licenses.txt
 %endif
 
 %files cuda
@@ -642,6 +712,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Apr 16 2021 Kevin Mittman <kmittman@nvidia.com> - 3:465.00-1
+- Optional GRID package (pass 'is_grid 1')
+
 * Thu Apr 08 2021 Kevin Mittman <kmittman@nvidia.com> - 3:460.00-1
 - Add unofficial aarch64 support for RHEL/CentOS 7
 
