@@ -330,6 +330,7 @@ ln -sf libcuda.so.%{version} libcuda.so
 ln -sf libnvidia-cfg.so.%{version}              libnvidia-cfg.so
 ln -sf libnvidia-ml.so.%{version}               libnvidia-ml.so
 ln -sf libnvidia-ptxjitcompiler.so.%{version}   libnvidia-ptxjitcompiler.so
+ln -sf libnvidia-nvvm.so.4.0.0                  libnvidia-nvvm.so.4
 ln -sf libnvidia-nvvm.so.4                      libnvidia-nvvm.so
 ln -sf libnvidia-ifr.so.%{version}              libnvidia-ifr.so
 ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
@@ -626,6 +627,7 @@ fi ||:
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
+%{_libdir}/libnvvm.so.4
 %{_libdir}/libnvidia-nvvm.so.4
 %{_libdir}/libnvidia-nvvm.so.4.0.0
 
