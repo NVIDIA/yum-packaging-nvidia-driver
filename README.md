@@ -105,7 +105,7 @@ To use the precompiled flavors `latest` and `branch-XXX`, use [yum-packaging-pre
 
 ### RHEL7-derivatives
 
-- [Markdown](../docs/guide-rhel7.md) :page_facing_up:
+- [Markdown](docs/guide-rhel7.md) :page_facing_up:
 - [HTML](https://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/guide-rhel7/) :notebook:
 - [PDF](https://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/guide-rhel7.pdf) :book:
 
