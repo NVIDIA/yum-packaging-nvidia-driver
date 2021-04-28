@@ -13,6 +13,8 @@ The `main` branch contains this README. The `.spec`, `.conf`, and `.sh` files ca
 
 - [Overview](#Overview)
 - [Deliverables](#Deliverables)
+- [Packaging Guide](#Packaging-Guide)
+- [Demo](#Demo)
 - [Prerequisites](#Prerequisites)
   * [Clone this git repository](#Clone-this-git-repository)
   * [Install build dependencies](#Install-build-dependencies)
@@ -97,6 +99,28 @@ To use the precompiled flavors `latest` and `branch-XXX`, use [yum-packaging-pre
  ```
 
 
+## Packaging Guide
+
+> _note:_ this guide covers building all of the `yum-packaging` NVIDIA driver packages. To build only the deliverables in this repository, see [Prerequisites](#Prerequisites) and [Building Manually](#Building-Manually) sections.
+
+### RHEL7-derivatives
+
+- [Markdown](../docs/guide-rhel7.md) :page_facing_up:
+- [HTML](https://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/guide-rhel7/) :notebook:
+- [PDF](https://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/guide-rhel7.pdf) :book:
+
+
+### RHEL8 and Fedora-derivatives
+
+- Coming soon
+
+## Demo
+
+![Demo](http://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/demo.gif)
+
+[![asciinema](https://img.shields.io/badge/Play%20Video-asciinema-red)](http://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/demo-ascii/)   [![gist](https://img.shields.io/badge/Auto%20TTY-gist-green)](https://gist.github.com/kmittman/087100eeda3705691ffb768dddf085b5)
+
+
 ## Prerequisites
 
 ### Clone this git repository:
@@ -116,6 +140,7 @@ yum install libappstream-glib
 # Packaging
 yum install rpm-build
 ```
+
 
 ## Building with script
 
