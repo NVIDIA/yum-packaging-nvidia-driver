@@ -103,6 +103,12 @@ To use the precompiled flavors `latest` and `branch-XXX`, use [yum-packaging-pre
 
 > _note:_ this guide covers building all of the `yum-packaging` NVIDIA driver packages. To build only the deliverables in this repository, see [Prerequisites](#Prerequisites) and [Building Manually](#Building-Manually) sections.
 
+### RHEL8 and Fedora-derivatives
+
+- [Markdown](docs/guide-rhel8.md) :page_facing_up:
+- [HTML](https://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/guide-rhel8/) :notebook:
+- [PDF](https://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/guide-rhel8.pdf) :book:
+
 ### RHEL7-derivatives
 
 - [Markdown](docs/guide-rhel7.md) :page_facing_up:
@@ -110,15 +116,18 @@ To use the precompiled flavors `latest` and `branch-XXX`, use [yum-packaging-pre
 - [PDF](https://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/guide-rhel7.pdf) :book:
 
 
-### RHEL8 and Fedora-derivatives
-
-- Coming soon
-
 ## Demo
 
-![Demo](http://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/demo.gif)
+### RHEL8
+![Demo-RHEL8](https://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/demo2.gif)
 
-[![asciinema](https://img.shields.io/badge/Play%20Video-asciinema-red)](http://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/demo-ascii/)   [![gist](https://img.shields.io/badge/Auto%20TTY-gist-green)](https://gist.github.com/kmittman/087100eeda3705691ffb768dddf085b5)
+[![webm](https://img.shields.io/badge/Play%20Video-webm-purple)](https://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/video-rhel8/#nvidia-driver)  [![asciinema](https://img.shields.io/badge/Play%20Video-asciinema-red)](http://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/demo2-ascii/)   [![gist](https://img.shields.io/badge/Auto%20TTY-gist-green)](https://gist.github.com/kmittman/8dce406d3c39a72c9d6bad08919d6901)
+
+
+### RHEL7
+![Demo-RHEL7](http://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/demo.gif)
+
+[![mp4](https://img.shields.io/badge/Play%20Video-mp4-purple)](https://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/video-rhel7/#nvidia-driver)   [![asciinema](https://img.shields.io/badge/Play%20Video-asciinema-red)](https://developer.download.nvidia.com/compute/github-demos/yum-packaging-nvidia-driver/demo-ascii/)   [![gist](https://img.shields.io/badge/Auto%20TTY-gist-green)](https://gist.github.com/kmittman/087100eeda3705691ffb768dddf085b5)
 
 
 ## Prerequisites
