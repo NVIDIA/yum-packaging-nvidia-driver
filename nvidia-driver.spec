@@ -580,7 +580,6 @@ fi ||:
 %{_libdir}/libGLX_nvidia.so.0
 %{_libdir}/libGLX_nvidia.so.%{version}
 %ifarch x86_64
-%{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
@@ -596,7 +595,6 @@ fi ||:
 %{_libdir}/libnvidia-glsi.so.%{version}
 %ifnarch ppc64le
 # Raytracing
-%{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
