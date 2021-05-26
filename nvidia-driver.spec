@@ -443,7 +443,6 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libGLX_nvidia.so.0
 %{_libdir}/libGLX_nvidia.so.%{version}
 %ifarch x86_64 aarch64
-%{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
@@ -457,7 +456,6 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-glsi.so.%{version}
 %ifarch x86_64 aarch64
 # Raytracing
-%{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
