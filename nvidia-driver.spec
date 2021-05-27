@@ -609,6 +609,7 @@ fi ||:
 %{_libdir}/libnvcuvid.so.%{version}
 %ifnarch ppc64le
 %{_libdir}/libnvidia-compiler.so.%{version}
+%{_libdir}/libnvidia-compiler-next.so.%{version}
 %endif
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
