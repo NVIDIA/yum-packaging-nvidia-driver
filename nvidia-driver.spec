@@ -330,8 +330,7 @@ ln -sf libcuda.so.%{version} libcuda.so
 ln -sf libnvidia-cfg.so.%{version}              libnvidia-cfg.so
 ln -sf libnvidia-ml.so.%{version}               libnvidia-ml.so
 ln -sf libnvidia-ptxjitcompiler.so.%{version}   libnvidia-ptxjitcompiler.so
-ln -sf libnvidia-nvvm.so.4.0.0                  libnvidia-nvvm.so.4
-ln -sf libnvidia-nvvm.so.4                      libnvidia-nvvm.so
+ln -sf libnvidia-nvvm.so.4.0.0                  libnvidia-nvvm.so
 ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
 
 # libglvnd indirect entry point
