@@ -332,7 +332,6 @@ ln -sf libnvidia-ml.so.%{version}               libnvidia-ml.so
 ln -sf libnvidia-ptxjitcompiler.so.%{version}   libnvidia-ptxjitcompiler.so
 ln -sf libnvidia-nvvm.so.4.0.0                  libnvidia-nvvm.so.4
 ln -sf libnvidia-nvvm.so.4                      libnvidia-nvvm.so
-ln -sf libnvidia-ifr.so.%{version}              libnvidia-ifr.so
 ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
 
 # libglvnd indirect entry point
@@ -555,7 +554,6 @@ fi ||:
 %{_libdir}/libnvidia-ml.so
 %{_libdir}/libnvidia-ptxjitcompiler.so
 %{_libdir}/libnvidia-nvvm.so
-%{_libdir}/libnvidia-ifr.so
 %{_libdir}/libnvidia-fbc.so
 
 %files libs
@@ -628,8 +626,6 @@ fi ||:
 %ifnarch ppc64le
 %{_libdir}/libnvidia-fbc.so.1
 %{_libdir}/libnvidia-fbc.so.%{version}
-%{_libdir}/libnvidia-ifr.so.1
-%{_libdir}/libnvidia-ifr.so.%{version}
 %endif
 
 %files NVML
