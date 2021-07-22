@@ -160,7 +160,6 @@ remote graphics scenarios.
 %package NVML
 Summary:        NVIDIA Management Library (NVML)
 Requires(post): ldconfig
-Requires:       nvidia-driver%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Provides:       cuda-nvml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description NVML
