@@ -227,10 +227,12 @@ ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 ln -sf libcuda.so.%{version} libcuda.so
 
 # Required for building additional applications agains the driver stack
-ln -sf libnvidia-cfg.so.%{version}              libnvidia-cfg.so
 ln -sf libnvidia-ml.so.%{version}               libnvidia-ml.so
 ln -sf libnvidia-ptxjitcompiler.so.%{version}   libnvidia-ptxjitcompiler.so
+%ifnarch %{ix86}
+ln -sf libnvidia-cfg.so.%{version}              libnvidia-cfg.so
 ln -sf libnvidia-nvvm.so.4.0.0                  libnvidia-nvvm.so
+%endif
 %ifnarch ppc64le aarch64
 ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
 %endif
@@ -322,7 +324,7 @@ install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
 cp -a libnvcuvid.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
-%ifnarch ppc64le
+%ifarch x86_64 aarch64
 cp -a libnvoptix.so* %{buildroot}%{_libdir}/
 %endif
 
@@ -370,6 +372,8 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %postun NVML -p /sbin/ldconfig
 %endif
 
+%ifnarch %{ix86}
+
 %files
 %if 0%{?rhel} == 6
 %doc LICENSE
@@ -406,14 +410,18 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_mandir}/man1/nvidia-cuda-mps-control.1.*
 %{_mandir}/man1/nvidia-smi.*
 
+%endif
+
 %files devel
 %{_includedir}/nvidia/
 %{_libdir}/libnvcuvid.so
 %{_libdir}/libnvidia-encode.so
-%{_libdir}/libnvidia-cfg.so
 %{_libdir}/libnvidia-ml.so
 %{_libdir}/libnvidia-ptxjitcompiler.so
+%ifnarch %{ix86}
+%{_libdir}/libnvidia-cfg.so
 %{_libdir}/libnvidia-nvvm.so
+%endif
 %ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-fbc.so
 %endif
@@ -481,8 +489,10 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
+%ifnarch %{ix86}
 %{_libdir}/libnvidia-nvvm.so.4
 %{_libdir}/libnvidia-nvvm.so.4.0.0
+%endif
 
 %files NvFBCOpenGL
 %ifnarch ppc64le aarch64
