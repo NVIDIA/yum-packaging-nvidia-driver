@@ -25,6 +25,7 @@ rm -f \
     libnvidia-gtk* nvidia-settings* \
     libGLESv1_CM.so.* libGLESv2.so.* libGL.la libGLdispatch.so.* libOpenGL.so.* libGLX.so.* libGL.so.1* libEGL.so.1* \
     libnvidia-egl-wayland.so.* \
+    libnvidia-egl-gbm.so.* \
     libnvidia-vulkan-producer.so.* \
     libOpenCL.so.1* \
     32/libGLESv1_CM.so.* 32/libGLESv2.so.* 32/libGL.la 32/libGLdispatch.so.* 32/libOpenGL.so.* 32/libGLX.so.* 32/libGL.so.1* 32/libEGL.so.1* \
