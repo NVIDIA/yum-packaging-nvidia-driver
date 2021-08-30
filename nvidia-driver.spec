@@ -232,7 +232,7 @@ ln -sf libnvidia-ptxjitcompiler.so.%{version}   libnvidia-ptxjitcompiler.so
 ln -sf libnvidia-cfg.so.%{version}              libnvidia-cfg.so
 ln -sf libnvidia-nvvm.so.4.0.0                  libnvidia-nvvm.so
 %endif
-%ifnarch ppc64le aarch64
+%ifnarch ppc64le
 ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
 %endif
 
@@ -421,7 +421,7 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-cfg.so
 %{_libdir}/libnvidia-nvvm.so
 %endif
-%ifnarch ppc64le aarch64
+%ifnarch ppc64le
 %{_libdir}/libnvidia-fbc.so
 %endif
 
@@ -494,7 +494,7 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %endif
 
 %files NvFBCOpenGL
-%ifnarch ppc64le aarch64
+%ifnarch ppc64le
 %{_libdir}/libnvidia-fbc.so.1
 %{_libdir}/libnvidia-fbc.so.%{version}
 %endif
