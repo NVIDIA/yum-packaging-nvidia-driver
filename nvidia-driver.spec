@@ -6,7 +6,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        %{?version}%{?!version:430.14}
+Version:        430.14
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -31,7 +31,7 @@ Source99:       nvidia-generate-tarballs.sh
 Source100:      nvidia-generate-tarballs-ppc64le.sh
 Source101:      nvidia-generate-tarballs-aarch64.sh
 
-%ifarch x86_64 aarch64 ppc64le
+%ifarch x86_64 aarch64
 
 %if 0%{?rhel} == 8
 BuildRequires:  platform-python
@@ -101,14 +101,14 @@ Requires:       libglvnd-opengl%{?_isa} >= 1.0
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 Requires:       egl-wayland%{?_isa}
-%ifnarch aarch64 ppc64le
+%ifnarch aarch64
 Requires:       vulkan-loader
 %endif
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} == 7
 Requires:       vulkan-filesystem
-%ifarch x86_64 aarch64 ppc64le
+%ifarch x86_64 aarch64
 Requires:       egl-wayland%{?_isa}
 %endif
 %endif
@@ -230,10 +230,8 @@ ln -sf libcuda.so.%{version} libcuda.so
 ln -sf libnvidia-cfg.so.%{version}              libnvidia-cfg.so
 ln -sf libnvidia-ml.so.%{version}               libnvidia-ml.so
 ln -sf libnvidia-ptxjitcompiler.so.%{version}   libnvidia-ptxjitcompiler.so
-%ifnarch ppc64le aarch64
 ln -sf libnvidia-ifr.so.%{version}              libnvidia-ifr.so
 ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
-%endif
 
 # libglvnd indirect entry point
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
@@ -250,7 +248,7 @@ mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
 
-%ifarch x86_64 aarch64 ppc64le
+%ifarch x86_64 aarch64
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
@@ -283,7 +281,7 @@ install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1
 install -p -m 0644 %{SOURCE40} %{buildroot}%{_datadir}/appdata/
 fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %{SOURCE41} README.txt "NVIDIA GEFORCE GPUS" | xargs appstream-util add-provide ${fn} modalias
-%{SOURCE41} README.txt "NVIDIA RTX/QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
@@ -320,7 +318,7 @@ install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
 cp -a libnvcuvid.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
-%ifnarch ppc64le
+%ifnarch ppc64le aarch64
 cp -a libnvoptix.so* %{buildroot}%{_libdir}/
 %endif
 
@@ -410,10 +408,8 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-cfg.so
 %{_libdir}/libnvidia-ml.so
 %{_libdir}/libnvidia-ptxjitcompiler.so
-%ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-ifr.so
 %{_libdir}/libnvidia-fbc.so
-%endif
 
 %files libs
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
@@ -435,6 +431,8 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %ifarch x86_64 aarch64
 %{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
+%endif
+%ifarch x86_64
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
 %endif
@@ -449,12 +447,10 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 # Raytracing
 %{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
-%{_libdir}/libnvoptix.so.1
-%{_libdir}/libnvoptix.so.%{version}
 %endif
 %ifarch x86_64
-%{_libdir}/libnvidia-ngx.so.1
-%{_libdir}/libnvidia-ngx.so.%{version}
+%{_libdir}/libnvoptix.so.1
+%{_libdir}/libnvoptix.so.%{version}
 %endif
 %if 0%{?fedora} || 0%{?rhel} >= 7
 %{_libdir}/libnvidia-glvkspirv.so.%{version}
@@ -478,6 +474,7 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-compiler.so.%{version}
 %endif
+%{_libdir}/libnvidia-fatbinaryloader.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
@@ -496,9 +493,6 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
-* Tue Apr 06 2021 Kevin Mittman <kmittman@nvidia.com> - 3:460.00-1
-- Populate version using variable
-
 * Sat May 18 2019 Simone Caronni <negativo17@gmail.com> - 3:430.14-1
 - Update to 430.14.
 

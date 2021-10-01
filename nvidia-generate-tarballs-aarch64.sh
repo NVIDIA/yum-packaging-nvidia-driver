@@ -5,10 +5,6 @@ VERSION=${VERSION:-390.42}
 DL_SITE=${DL_SITE:-http://us.download.nvidia.com/XFree86}
 TEMP_UNPACK=${TEMP_UNPACK:-temp}
 
-ARCH=${ARCH:-aarch64}
-PLATFORM=${PLATFORM:-Linux-${ARCH}}
-RUN_FILE=${RUN_FILE:-NVIDIA-${PLATFORM}-${VERSION}.run}
-
 get_run_file() {
     printf "Downloading installer for ${VERSION} ${ARCH}... "
     [[ -f $RUN_FILE ]] || wget -c -q ${DL_SITE}/${PLATFORM}/${VERSION}/$RUN_FILE
@@ -59,6 +55,9 @@ create_tarball() {
     printf "OK\n"
 }
 
+ARCH=aarch64
+PLATFORM=Linux-${ARCH}
+RUN_FILE=NVIDIA-${PLATFORM}-${VERSION}.run
 get_run_file
 extract_run_file
 create_tarball
