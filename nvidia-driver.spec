@@ -1,5 +1,3 @@
-%define fedora 0
-%define rhel 7
 %global debug_package %{nil}
 %global __strip /bin/true
 
@@ -23,6 +21,7 @@
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
+%global __requires_exclude .*libnvidia-ngx\\.so.*
 %endif
 
 # Don't disable nouveau at boot. Just matching the driver with OutputClass in
@@ -41,19 +40,17 @@
 %endif
 
 Name:           %{_basename}-%{_named_version}
-Version:        %{?version}%{?!version:430.14}
+Version:        410.73
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
 URL:            http://www.nvidia.com/object/unix.html
-ExclusiveArch:  %{ix86} x86_64 ppc64le aarch64
+ExclusiveArch:  %{ix86} x86_64 ppc64le
 
 Source0:        %{_basename}-%{version}-i386.tar.xz
 Source1:        %{_basename}-%{version}-x86_64.tar.xz
 Source2:        %{_basename}-%{version}-ppc64le.tar.xz
-Source3:        %{_basename}-%{version}-aarch64.tar.xz
-
 # For servers without OutputClass device options
 Source10:       99-nvidia-modules.conf
 Source11:       10-nvidia-driver.conf
@@ -71,7 +68,6 @@ Source41:       parse-readme.py
 
 Source99:       nvidia-generate-tarballs.sh
 Source100:      nvidia-generate-tarballs-ppc64le.sh
-Source101:      nvidia-generate-tarballs-aarch64.sh
 
 %ifarch x86_64
 
@@ -167,7 +163,7 @@ version %{version}.
 %package libs
 Summary:        Libraries for %{name}
 Requires(post): ldconfig
-%ifnarch ppc64le aarch64
+%ifnarch ppc64le
 Requires:       libvdpau%{?_isa} >= 0.5
 %endif
 Requires:       libglvnd%{?_isa} >= 1.0
@@ -268,27 +264,12 @@ and the SDK provides the appropriate header, stub libraries and sample
 applications. Each new version of NVML is backwards compatible and is intended
 to be a platform for building 3rd party applications.
 
-# GRID vGPU support
-%if 0%{?is_grid} == 1
-%package -n nvidia-grid-utils
-Summary:        NVIDIA driver GRID utilities
-Requires(post): ldconfig
-%endif
-
-%if 0%{?is_grid} == 1
-%description -n nvidia-grid-utils
-NVIDIA driver GRID utilities
-%endif
-
-
 %package cuda
 Summary:        CUDA integration for %{name}
 Conflicts:      xorg-x11-drv-nvidia-cuda
 Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-persistenced-%{_named_version} = %{?epoch:%{epoch}:}%{version}
-Requires:       opencl-filesystem
-Requires:       ocl-icd
 
 Provides:       %{_basename}-cuda = %{?epoch:%{epoch}:}%{version}-%{release}
 
@@ -333,10 +314,6 @@ This package provides the development files of the %{name} package.
 %setup -q -T -b 2 -n %{_basename}-%{version}-ppc64le
 %endif
 
-%ifarch aarch64
-%setup -q -T -b 3 -n %{_basename}-%{version}-aarch64
-%endif
-
 # Create symlinks for shared objects
 ldconfig -vn .
 
@@ -359,9 +336,7 @@ ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 
 # Needed for vulkan
-if [ ! -f nvidia_icd.%{_target_cpu}.json ] && [ -f nvidia_icd.json ]; then
-    cat nvidia_icd.json > nvidia_icd.%{_target_cpu}.json
-fi
+cat nvidia_icd.json > nvidia_icd.%{_target_cpu}.json
 
 
 %build
@@ -384,19 +359,6 @@ mkdir -p %{buildroot}%{_udevrulesdir}
 mkdir -p %{buildroot}%{_modprobe_d}/
 mkdir -p %{buildroot}%{_dracut_conf_d}/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
-
-%if 0%{?is_grid} == 1
-mkdir -p %{buildroot}%{_libdir}/nvidia/
-%if 0%{?rhel} >= 7 || 0%{?fedora}
-mkdir -p %{buildroot}%{_libdir}/nvidia/systemd/
-%endif
-%if 0%{?rhel} == 6
-mkdir -p %{buildroot}%{_libdir}/nvidia/sysv/
-%endif
-%ifarch x86_64
-mkdir -p %{buildroot}%{_libdir}/nvidia/gridd/
-%endif
-%endif
 
 %if 0%{?rhel}
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
@@ -431,7 +393,7 @@ install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1
 install -p -m 0644 %{SOURCE40} %{buildroot}%{_datadir}/appdata/
 fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %{SOURCE41} README.txt "NVIDIA GEFORCE GPUS" | xargs appstream-util add-provide ${fn} modalias
-%{SOURCE41} README.txt "NVIDIA RTX/QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
@@ -480,27 +442,6 @@ cp -a libnvoptix.so* %{buildroot}%{_libdir}/
 cp -a libGLX_indirect.so* %{buildroot}%{_libdir}/
 install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
-%endif
-
-# GRID utility
-%if 0%{?is_grid} == 1
-cp -a gridd.conf.template %{buildroot}%{_sysconfdir}/nvidia/
-cp -a nvidia-gridd %{buildroot}%{_bindir}/
-%if 0%{?rhel} >= 7 || 0%{?fedora}
-cp -a init-scripts/systemd/nvidia-gridd.service %{buildroot}%{_libdir}/nvidia/systemd/
-%endif
-%if 0%{?rhel} == 6
-cp -a init-scripts/sysv/nvidia-gridd %{buildroot}%{_libdir}/nvidia/sysv/
-%endif
-%ifarch x86_64
-cp -a libFlxComm64.so.* %{buildroot}%{_libdir}/nvidia/gridd/
-cp -a libFlxCore64.so.* %{buildroot}%{_libdir}/nvidia/gridd/
-%endif
-cp -a init-scripts/common.sh %{buildroot}%{_libdir}/nvidia/
-cp -a init-scripts/post-install %{buildroot}%{_libdir}/nvidia/
-cp -a init-scripts/pre-uninstall %{buildroot}%{_libdir}/nvidia/
-cp -a nvidia-gridd.* %{buildroot}%{_mandir}/man1/
-cp -a grid-third-party-licenses.txt %{buildroot}%{_datadir}/nvidia/
 %endif
 
 %post
@@ -591,27 +532,6 @@ fi ||:
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
-%if 0%{?is_grid} == 1
-%files -n nvidia-grid-utils
-%{_sysconfdir}/nvidia/gridd.conf.template
-%{_bindir}/nvidia-gridd
-%if 0%{?rhel} >= 7 || 0%{?fedora}
-%{_libdir}/nvidia/systemd/nvidia-gridd.service
-%endif
-%if 0%{?rhel} == 6
-%{_libdir}/nvidia/sysv/nvidia-gridd
-%endif
-%ifarch x86_64
-%{_libdir}/nvidia/gridd/libFlxComm64.so.*
-%{_libdir}/nvidia/gridd/libFlxCore64.so.*
-%endif
-%{_libdir}/nvidia/common.sh
-%{_libdir}/nvidia/post-install
-%{_libdir}/nvidia/pre-uninstall
-%{_mandir}/man1/nvidia-gridd.*
-%{_datadir}/nvidia/grid-third-party-licenses.txt
-%endif
-
 %files cuda
 %{_sysconfdir}/OpenCL/vendors/*
 %{_bindir}/nvidia-cuda-mps-control
@@ -658,7 +578,7 @@ fi ||:
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
 %endif
-%ifarch x86_64 ppc64le aarch64
+%ifarch x86_64 ppc64le
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
 %endif
@@ -687,7 +607,7 @@ fi ||:
 %{_libdir}/libcuda.so.%{version}
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
-%ifnarch ppc64le aarch64
+%ifnarch ppc64le
 %{_libdir}/libnvidia-compiler.so.%{version}
 %endif
 %{_libdir}/libnvidia-encode.so.1
@@ -700,7 +620,7 @@ fi ||:
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
 
 %files NvFBCOpenGL
-%ifnarch ppc64le aarch64
+%ifnarch ppc64le
 %{_libdir}/libnvidia-fbc.so.1
 %{_libdir}/libnvidia-fbc.so.%{version}
 %{_libdir}/libnvidia-ifr.so.1
@@ -712,15 +632,6 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
-* Fri Apr 16 2021 Kevin Mittman <kmittman@nvidia.com> - 3:465.00-1
-- Optional GRID package (pass 'is_grid 1')
-
-* Thu Apr 08 2021 Kevin Mittman <kmittman@nvidia.com> - 3:460.00-1
-- Add unofficial aarch64 support for RHEL/CentOS 7
-
-* Tue Apr 06 2021 Kevin Mittman <kmittman@nvidia.com> - 3:460.00-1
-- Populate version using variable
-
 * Tue Oct 30 2018 Simone Caronni <negativo17@gmail.com> - 3:410.73-4
 - Disable modesetting on Fedora < 29.
 
