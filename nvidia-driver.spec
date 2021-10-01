@@ -6,7 +6,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        %{?version}%{?!version:430.14}
+Version:        430.14
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -230,6 +230,8 @@ ln -sf libcuda.so.%{version} libcuda.so
 ln -sf libnvidia-cfg.so.%{version}              libnvidia-cfg.so
 ln -sf libnvidia-ml.so.%{version}               libnvidia-ml.so
 ln -sf libnvidia-ptxjitcompiler.so.%{version}   libnvidia-ptxjitcompiler.so
+ln -sf libnvidia-nvvm.so.4.0.0                  libnvidia-nvvm.so.4
+ln -sf libnvidia-nvvm.so.4                      libnvidia-nvvm.so
 %ifnarch ppc64le aarch64
 ln -sf libnvidia-ifr.so.%{version}              libnvidia-ifr.so
 ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
@@ -312,6 +314,12 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 
 %endif
 
+# gsp.bin
+install -m 0755 -d %{buildroot}/lib/firmware/nvidia/%{version}/
+%ifarch x86_64
+install -p -m 0644 firmware/gsp.bin %{buildroot}/lib/firmware/nvidia/%{version}/
+%endif
+
 # Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
@@ -383,6 +391,7 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_datadir}/nvidia
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
+/lib/firmware/nvidia/%{version}
 
 # X.org configuration files
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
@@ -410,6 +419,7 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-cfg.so
 %{_libdir}/libnvidia-ml.so
 %{_libdir}/libnvidia-ptxjitcompiler.so
+%{_libdir}/libnvidia-nvvm.so
 %ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-ifr.so
 %{_libdir}/libnvidia-fbc.so
@@ -482,6 +492,8 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
+%{_libdir}/libnvidia-nvvm.so.4
+%{_libdir}/libnvidia-nvvm.so.4.0.0
 
 %files NvFBCOpenGL
 %ifnarch ppc64le aarch64
@@ -496,9 +508,6 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
-* Tue Apr 06 2021 Kevin Mittman <kmittman@nvidia.com> - 3:460.00-1
-- Populate version using variable
-
 * Sat May 18 2019 Simone Caronni <negativo17@gmail.com> - 3:430.14-1
 - Update to 430.14.
 

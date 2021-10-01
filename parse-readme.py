@@ -31,7 +31,7 @@ def main():
         line = line.replace('\n', '')
 
         # end of section
-        if len(line) > 0 and not line.startswith('    '):
+        if len(line) > 0 and not line.startswith(' '):
             in_section = False
             in_table = False
             continue
@@ -41,14 +41,14 @@ def main():
             continue
 
         # skip the header
-        if line.startswith('    ---'):
+        if line.startswith(' ---'):
             in_table = True
             continue
         if not in_table:
             continue
 
         # get name
-        pid = int(line[42:46], 16)
+        pid = int(line[50:54], 16)
         if not pid in pids:
             pids.append(pid)
 
