@@ -6,18 +6,17 @@
 %endif
 
 Name:           nvidia-driver
-Version:        %{?version}%{?!version:430.14}
+Version:        430.14
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
 URL:            http://www.nvidia.com/object/unix.html
-ExclusiveArch:  %{ix86} x86_64 ppc64le aarch64
+ExclusiveArch:  %{ix86} x86_64 ppc64le
 
 Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
 Source2:        %{name}-%{version}-ppc64le.tar.xz
-Source3:        %{name}-%{version}-aarch64.tar.xz
 # For servers without OutputClass device options
 Source10:       99-nvidia-modules.conf
 Source11:       10-nvidia-driver.conf
@@ -29,9 +28,8 @@ Source41:       parse-readme.py
 
 Source99:       nvidia-generate-tarballs.sh
 Source100:      nvidia-generate-tarballs-ppc64le.sh
-Source101:      nvidia-generate-tarballs-aarch64.sh
 
-%ifarch x86_64 aarch64 ppc64le
+%ifarch x86_64
 
 %if 0%{?rhel} == 8
 BuildRequires:  platform-python
@@ -101,14 +99,12 @@ Requires:       libglvnd-opengl%{?_isa} >= 1.0
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 Requires:       egl-wayland%{?_isa}
-%ifnarch aarch64 ppc64le
 Requires:       vulkan-loader
-%endif
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} == 7
 Requires:       vulkan-filesystem
-%ifarch x86_64 aarch64 ppc64le
+%ifarch x86_64
 Requires:       egl-wayland%{?_isa}
 %endif
 %endif
@@ -175,9 +171,7 @@ to be a platform for building 3rd party applications.
 Summary:        CUDA integration for %{name}
 Conflicts:      xorg-x11-drv-nvidia-cuda
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
-%ifnarch aarch64
 Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
-%endif
 Requires:       opencl-filesystem
 Requires:       ocl-icd
 
@@ -211,10 +205,6 @@ This package provides the development files of the %{name} package.
 %setup -q -T -b 2 -n %{name}-%{version}-ppc64le
 %endif
 
-%ifarch aarch64
-%setup -q -T -b 3 -n %{name}-%{version}-aarch64
-%endif
-
 # Create symlinks for shared objects
 ldconfig -vn .
 
@@ -230,16 +220,17 @@ ln -sf libcuda.so.%{version} libcuda.so
 ln -sf libnvidia-cfg.so.%{version}              libnvidia-cfg.so
 ln -sf libnvidia-ml.so.%{version}               libnvidia-ml.so
 ln -sf libnvidia-ptxjitcompiler.so.%{version}   libnvidia-ptxjitcompiler.so
-%ifnarch ppc64le aarch64
 ln -sf libnvidia-ifr.so.%{version}              libnvidia-ifr.so
 ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
-%endif
 
 # libglvnd indirect entry point
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 
-cat nvidia_icd.json > nvidia_icd.%{_target_cpu}.json
-
+%if 0%{?fedora} || 0%{?rhel} >= 7
+cat nvidia_icd.json.template | sed -e 's/__NV_VK_ICD__/libGLX_nvidia.so.0/' > nvidia_icd.%{_target_cpu}.json
+%else
+rm -f libnvidia-glvkspirv.so.%{version}
+%endif
 
 %build
 
@@ -250,7 +241,7 @@ mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
 
-%ifarch x86_64 aarch64 ppc64le
+%ifarch x86_64
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
@@ -283,7 +274,7 @@ install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1
 install -p -m 0644 %{SOURCE40} %{buildroot}%{_datadir}/appdata/
 fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %{SOURCE41} README.txt "NVIDIA GEFORCE GPUS" | xargs appstream-util add-provide ${fn} modalias
-%{SOURCE41} README.txt "NVIDIA RTX/QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
@@ -312,8 +303,10 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 
 %endif
 
+%if 0%{?fedora} || 0%{?rhel} >= 7
 # Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
+%endif
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 
 # Unique libraries
@@ -333,15 +326,7 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 
 
 
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%postun
-%systemd_postun nvidia-fallback.service
-%systemd_preun nvidia-hibernate.service
-%systemd_preun nvidia-resume.service
-%systemd_preun nvidia-suspend.service
-%endif
-
-%if 0%{?fedora} >= 28
+%if 0%{?fedora} >= 28 || 0%{?rhel} >= 8
 %ldconfig_scriptlets libs
 
 %ldconfig_scriptlets cuda-libs
@@ -410,10 +395,8 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-cfg.so
 %{_libdir}/libnvidia-ml.so
 %{_libdir}/libnvidia-ptxjitcompiler.so
-%ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-ifr.so
 %{_libdir}/libnvidia-fbc.so
-%endif
 
 %files libs
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
@@ -432,29 +415,25 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libGLESv2_nvidia.so.%{version}
 %{_libdir}/libGLX_nvidia.so.0
 %{_libdir}/libGLX_nvidia.so.%{version}
-%ifarch x86_64 aarch64
+%ifarch x86_64
 %{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
 %endif
-%ifarch x86_64 ppc64le aarch64
+%ifarch x86_64 ppc64le
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
 %endif
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
-%ifarch x86_64 aarch64
+%ifnarch ppc64le
 # Raytracing
 %{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
-%endif
-%ifarch x86_64
-%{_libdir}/libnvidia-ngx.so.1
-%{_libdir}/libnvidia-ngx.so.%{version}
 %endif
 %if 0%{?fedora} || 0%{?rhel} >= 7
 %{_libdir}/libnvidia-glvkspirv.so.%{version}
@@ -462,8 +441,6 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-tls.so.%{version}
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
-%{_libdir}/libnvidia-allocator.so.1
-%{_libdir}/libnvidia-allocator.so.%{version}
 
 %files cuda-libs
 %{_libdir}/libcuda.so
@@ -471,20 +448,23 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libcuda.so.%{version}
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
-%{_libdir}/libnvidia-encode.so.1
-%{_libdir}/libnvidia-encode.so.%{version}
-%{_libdir}/libnvidia-opticalflow.so.1
-%{_libdir}/libnvidia-opticalflow.so.%{version}
-%ifnarch ppc64le aarch64
+%ifnarch ppc64le
 %{_libdir}/libnvidia-compiler.so.%{version}
 %endif
+%{_libdir}/libnvidia-encode.so.1
+%{_libdir}/libnvidia-encode.so.%{version}
+%{_libdir}/libnvidia-fatbinaryloader.so.%{version}
+%{_libdir}/libnvidia-opticalflow.so.1
+%{_libdir}/libnvidia-opticalflow.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
+%{_libdir}/libnvidia-opticalflow.so.1
+%{_libdir}/libnvidia-opticalflow.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
 
 %files NvFBCOpenGL
-%ifnarch ppc64le aarch64
+%ifnarch ppc64le
 %{_libdir}/libnvidia-fbc.so.1
 %{_libdir}/libnvidia-fbc.so.%{version}
 %{_libdir}/libnvidia-ifr.so.1
@@ -496,9 +476,6 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
-* Tue Apr 06 2021 Kevin Mittman <kmittman@nvidia.com> - 3:460.00-1
-- Populate version using variable
-
 * Sat May 18 2019 Simone Caronni <negativo17@gmail.com> - 3:430.14-1
 - Update to 430.14.
 
