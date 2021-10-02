@@ -483,6 +483,9 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-opticalflow.so.%{version}
 %ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-compiler.so.%{version}
+%ifnarch %{ix86}
+%{_libdir}/libnvidia-compiler-next.so.%{version}
+%endif
 %endif
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
