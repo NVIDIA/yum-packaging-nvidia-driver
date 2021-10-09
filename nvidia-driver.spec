@@ -6,7 +6,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        430.14
+Version:        %{?version}%{?!version:430.14}
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -234,6 +234,8 @@ ln -sf libnvidia-nvvm.so.4.0.0                  libnvidia-nvvm.so.4
 ln -sf libnvidia-nvvm.so.4                      libnvidia-nvvm.so
 %ifnarch ppc64le aarch64
 ln -sf libnvidia-ifr.so.%{version}              libnvidia-ifr.so
+%endif
+%ifnarch ppc64le
 ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
 %endif
 
@@ -422,6 +424,8 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-nvvm.so
 %ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-ifr.so
+%endif
+%ifnarch ppc64le
 %{_libdir}/libnvidia-fbc.so
 %endif
 
@@ -496,9 +500,11 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-nvvm.so.4.0.0
 
 %files NvFBCOpenGL
-%ifnarch ppc64le aarch64
+%ifnarch ppc64le
 %{_libdir}/libnvidia-fbc.so.1
 %{_libdir}/libnvidia-fbc.so.%{version}
+%endif
+%ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-ifr.so.1
 %{_libdir}/libnvidia-ifr.so.%{version}
 %endif
@@ -508,6 +514,9 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Tue Apr 06 2021 Kevin Mittman <kmittman@nvidia.com> - 3:460.00-1
+- Populate version using variable
+
 * Sat May 18 2019 Simone Caronni <negativo17@gmail.com> - 3:430.14-1
 - Update to 430.14.
 
