@@ -23,6 +23,7 @@
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
+%global _systemd_util_dir %{_libdir}/systemd
 %endif
 
 # Don't disable nouveau at boot. Just matching the driver with OutputClass in
@@ -34,6 +35,7 @@
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
+%global _systemd_util_dir %{_libdir}/systemd
 %endif
 
 %if 0%{?rhel}
@@ -75,7 +77,7 @@ Source101:      nvidia-generate-tarballs-aarch64.sh
 
 %ifarch x86_64
 
-%if 0%{?rhel} == 8
+%if 0%{?rhel} >= 8
 BuildRequires:  platform-python
 %else
 BuildRequires:  python2
@@ -402,6 +404,12 @@ mkdir -p %{buildroot}%{_libdir}/nvidia/gridd/
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 %endif
 
+%if 0%{?rhel} == 7
+mkdir -p %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
+mkdir -p %{buildroot}%{_unitdir}/
+mkdir -p %{buildroot}%{_systemd_util_dir}/system-sleep/
+%endif
+
 %if 0%{?fedora} || 0%{?rhel} >= 8
 mkdir -p %{buildroot}%{_datadir}/appdata/
 mkdir -p %{buildroot}%{_unitdir}
@@ -580,6 +588,11 @@ fi ||:
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_modprobe_d}/nvidia.conf
 %{_udevrulesdir}/60-nvidia-drm.rules
+%{_bindir}/nvidia-sleep.sh
+%{_systemd_util_dir}/system-sleep/nvidia
+%{_unitdir}/nvidia-hibernate.service
+%{_unitdir}/nvidia-resume.service
+%{_unitdir}/nvidia-suspend.service
 /lib/firmware/nvidia/%{version}
 
 # X.org configuration files
