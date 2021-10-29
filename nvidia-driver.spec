@@ -490,6 +490,16 @@ install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
+# NGX Proton/Wine library
+cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
+
+# Systemd units and script for suspending/resuming
+install -p -m 0644 systemd/system/nvidia-hibernate.service %{buildroot}%{_unitdir}/
+install -p -m 0644 systemd/system/nvidia-resume.service %{buildroot}%{_unitdir}/
+install -p -m 0644 systemd/system/nvidia-suspend.service %{buildroot}%{_unitdir}/
+install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
+install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/system-sleep/
+
 # GRID utility
 %if 0%{?is_grid} == 1
 cp -a gridd.conf.template %{buildroot}%{_sysconfdir}/nvidia/
@@ -670,6 +680,10 @@ fi ||:
 %{_libdir}/libnvoptix.so.%{version}
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
+%endif
+# Wine libraries
+%ifarch x86_64
+%{_libdir}/nvidia/wine/*.dll
 %endif
 %ifarch x86_64 ppc64le aarch64
 %{_libdir}/libnvidia-cfg.so.1
