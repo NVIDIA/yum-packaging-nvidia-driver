@@ -1,6 +1,7 @@
 %global debug_package %{nil}
 %global __strip /bin/true
 
+%global _dbus_systemd_dir %{_sysconfdir}/dbus-1/system.d
 %global _systemd_util_dir %{_libdir}/systemd
 
 %if 0%{?rhel}
@@ -268,6 +269,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 mkdir -p %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
 mkdir -p %{buildroot}%{_unitdir}/
 mkdir -p %{buildroot}%{_systemd_util_dir}/system-sleep/
+mkdir -p %{buildroot}%{_dbus_systemd_dir}/
 
 %if 0%{?rhel}
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
@@ -344,8 +346,11 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 # NGX Proton/Wine library
 cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
 
+install -p -m 0644 nvidia-dbus.conf %{buildroot}%{_dbus_systemd_dir}/
+
 # Systemd units and script for suspending/resuming
 install -p -m 0644 systemd/system/nvidia-hibernate.service %{buildroot}%{_unitdir}/
+install -p -m 0644 systemd/system/nvidia-powerd.service %{buildroot}%{_unitdir}/
 install -p -m 0644 systemd/system/nvidia-resume.service %{buildroot}%{_unitdir}/
 install -p -m 0644 systemd/system/nvidia-suspend.service %{buildroot}%{_unitdir}/
 install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
@@ -356,17 +361,20 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %post
 %systemd_post nvidia-hibernate.service
+%systemd_post nvidia-powerd.service
 %systemd_post nvidia-resume.service
 %systemd_post nvidia-suspend.service
 
 %preun
 %systemd_preun nvidia-fallback.service
 %systemd_preun nvidia-hibernate.service
+%systemd_preun nvidia-powerd.service
 %systemd_preun nvidia-resume.service
 %systemd_preun nvidia-suspend.service
 
 %postun
 %systemd_postun nvidia-hibernate.service
+%systemd_postun nvidia-powerd.service
 %systemd_postun nvidia-resume.service
 %systemd_postun nvidia-suspend.service
 %endif
@@ -418,9 +426,13 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_bindir}/nvidia-sleep.sh
 %{_systemd_util_dir}/system-sleep/nvidia
 %{_unitdir}/nvidia-hibernate.service
+%{_unitdir}/nvidia-powerd.service
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
 /lib/firmware/nvidia/%{version}
+
+# nvidia-powerd
+%config(noreplace) %{_dbus_systemd_dir}/nvidia-dbus.conf
 
 # X.org configuration files
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
