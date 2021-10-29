@@ -377,6 +377,7 @@ mkdir -p %{buildroot}%{_libdir}/vdpau/
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
+mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/extensions/
 mkdir -p %{buildroot}%{_mandir}/man1/
@@ -386,6 +387,11 @@ mkdir -p %{buildroot}%{_udevrulesdir}
 mkdir -p %{buildroot}%{_modprobe_d}/
 mkdir -p %{buildroot}%{_dracut_conf_d}/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
+
+mkdir -p %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
+mkdir -p %{buildroot}%{_unitdir}/
+mkdir -p %{buildroot}%{_systemd_util_dir}/system-sleep/
+mkdir -p %{buildroot}%{_dbus_systemd_dir}/
 
 %if 0%{?is_grid} == 1
 mkdir -p %{buildroot}%{_libdir}/nvidia/
@@ -493,8 +499,11 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 # NGX Proton/Wine library
 cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
 
+install -p -m 0644 nvidia-dbus.conf %{buildroot}%{_dbus_systemd_dir}/
+
 # Systemd units and script for suspending/resuming
 install -p -m 0644 systemd/system/nvidia-hibernate.service %{buildroot}%{_unitdir}/
+install -p -m 0644 systemd/system/nvidia-powerd.service %{buildroot}%{_unitdir}/
 install -p -m 0644 systemd/system/nvidia-resume.service %{buildroot}%{_unitdir}/
 install -p -m 0644 systemd/system/nvidia-suspend.service %{buildroot}%{_unitdir}/
 install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
@@ -601,9 +610,13 @@ fi ||:
 %{_bindir}/nvidia-sleep.sh
 %{_systemd_util_dir}/system-sleep/nvidia
 %{_unitdir}/nvidia-hibernate.service
+%{_unitdir}/nvidia-powerd.service
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
 /lib/firmware/nvidia/%{version}
+
+# nvidia-powerd
+%config(noreplace) %{_dbus_systemd_dir}/nvidia-dbus.conf
 
 # X.org configuration files
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
