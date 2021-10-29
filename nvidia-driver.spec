@@ -1,6 +1,8 @@
 %global debug_package %{nil}
 %global __strip /bin/true
 
+%global _systemd_util_dir %{_libdir}/systemd
+
 %if 0%{?rhel}
 %global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
@@ -33,7 +35,7 @@ Source101:      nvidia-generate-tarballs-aarch64.sh
 
 %ifarch x86_64 aarch64 ppc64le
 
-%if 0%{?rhel} == 8
+%if 0%{?rhel} >= 8
 BuildRequires:  platform-python
 %else
 BuildRequires:  python2
@@ -258,12 +260,17 @@ mkdir -p %{buildroot}%{_libdir}/vdpau/
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
+mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/extensions/
 mkdir -p %{buildroot}%{_mandir}/man1/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
+
+mkdir -p %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
+mkdir -p %{buildroot}%{_unitdir}/
+mkdir -p %{buildroot}%{_systemd_util_dir}/system-sleep/
 
 %if 0%{?rhel}
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
@@ -393,6 +400,11 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_datadir}/nvidia
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
+%{_bindir}/nvidia-sleep.sh
+%{_systemd_util_dir}/system-sleep/nvidia
+%{_unitdir}/nvidia-hibernate.service
+%{_unitdir}/nvidia-resume.service
+%{_unitdir}/nvidia-suspend.service
 /lib/firmware/nvidia/%{version}
 
 # X.org configuration files
@@ -469,6 +481,10 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %ifarch x86_64
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
+%endif
+# Wine libraries
+%ifarch x86_64
+%{_libdir}/nvidia/wine/*.dll
 %endif
 %if 0%{?fedora} || 0%{?rhel} >= 7
 %{_libdir}/libnvidia-glvkspirv.so.%{version}
