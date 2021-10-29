@@ -257,6 +257,7 @@ mkdir -p %{buildroot}%{_libdir}/vdpau/
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
+mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/extensions/
 mkdir -p %{buildroot}%{_mandir}/man1/
@@ -339,6 +340,9 @@ cp -a libGLX_indirect.so* %{buildroot}%{_libdir}/
 install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
+
+# NGX Proton/Wine library
+cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
 
 # Systemd units and script for suspending/resuming
 install -p -m 0644 systemd/system/nvidia-hibernate.service %{buildroot}%{_unitdir}/
@@ -484,6 +488,10 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libnvoptix.so.%{version}
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
+%endif
+# Wine libraries
+%ifarch x86_64
+%{_libdir}/nvidia/wine/*.dll
 %endif
 %if 0%{?fedora} || 0%{?rhel} >= 7
 %{_libdir}/libnvidia-glvkspirv.so.%{version}
