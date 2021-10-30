@@ -329,7 +329,9 @@ install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 
 # NGX Proton/Wine library
+%ifarch x86_64
 cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
+%endif
 
 # Unique libraries
 cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
@@ -345,9 +347,6 @@ cp -a libGLX_indirect.so* %{buildroot}%{_libdir}/
 install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
-
-# NGX Proton/Wine library
-cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
 
 install -p -m 0644 nvidia-dbus.conf %{buildroot}%{_dbus_systemd_dir}/
 
