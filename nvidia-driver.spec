@@ -348,7 +348,9 @@ install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
+%ifarch x86_64 aarch64 ppc64le
 install -p -m 0644 nvidia-dbus.conf %{buildroot}%{_dbus_systemd_dir}/
+%endif
 
 # Systemd units and script for suspending/resuming
 install -p -m 0644 systemd/system/nvidia-hibernate.service %{buildroot}%{_unitdir}/
@@ -434,7 +436,9 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 /lib/firmware/nvidia/%{version}
 
 # nvidia-powerd
+%ifarch x86_64 aarch64 ppc64le
 %config(noreplace) %{_dbus_systemd_dir}/nvidia-dbus.conf
+%endif
 
 # X.org configuration files
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
