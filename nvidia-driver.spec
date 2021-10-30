@@ -40,6 +40,7 @@
 
 %if 0%{?rhel}
 %global _glvnd_libdir   %{_libdir}/libglvnd
+%global _dbus_systemd_dir %{_sysconfdir}/dbus-1/system.d
 %endif
 
 Name:           %{_basename}-%{_named_version}
