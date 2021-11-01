@@ -353,13 +353,14 @@ install -p -m 0644 nvidia-dbus.conf %{buildroot}%{_dbus_systemd_dir}/
 %endif
 
 # Systemd units and script for suspending/resuming
+%ifnarch %{ix86}
 install -p -m 0644 systemd/system/nvidia-hibernate.service %{buildroot}%{_unitdir}/
 install -p -m 0644 systemd/system/nvidia-powerd.service %{buildroot}%{_unitdir}/
 install -p -m 0644 systemd/system/nvidia-resume.service %{buildroot}%{_unitdir}/
 install -p -m 0644 systemd/system/nvidia-suspend.service %{buildroot}%{_unitdir}/
 install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
 install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/system-sleep/
-
+%endif
 
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
