@@ -1,8 +1,6 @@
 %global debug_package %{nil}
 %global __strip /bin/true
 
-%global _systemd_util_dir %{_libdir}/systemd
-
 %if 0%{?rhel}
 %global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
@@ -270,7 +268,6 @@ mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
 mkdir -p %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
 mkdir -p %{buildroot}%{_unitdir}/
-mkdir -p %{buildroot}%{_systemd_util_dir}/system-sleep/
 
 %if 0%{?rhel}
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
@@ -403,11 +400,6 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_datadir}/nvidia
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
-%{_bindir}/nvidia-sleep.sh
-%{_systemd_util_dir}/system-sleep/nvidia
-%{_unitdir}/nvidia-hibernate.service
-%{_unitdir}/nvidia-resume.service
-%{_unitdir}/nvidia-suspend.service
 /lib/firmware/nvidia/%{version}
 
 # X.org configuration files
