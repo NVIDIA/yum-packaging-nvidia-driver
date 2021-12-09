@@ -491,13 +491,6 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 # NGX Proton/Wine library
 cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
 
-# Systemd units and script for suspending/resuming
-install -p -m 0644 systemd/system/nvidia-hibernate.service %{buildroot}%{_unitdir}/
-install -p -m 0644 systemd/system/nvidia-resume.service %{buildroot}%{_unitdir}/
-install -p -m 0644 systemd/system/nvidia-suspend.service %{buildroot}%{_unitdir}/
-install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
-install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/system-sleep/
-
 # GRID utility
 %if 0%{?is_grid} == 1
 cp -a gridd.conf.template %{buildroot}%{_sysconfdir}/nvidia/
