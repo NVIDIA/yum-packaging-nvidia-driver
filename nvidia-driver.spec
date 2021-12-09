@@ -377,7 +377,6 @@ mkdir -p %{buildroot}%{_libdir}/vdpau/
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
-mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/extensions/
 mkdir -p %{buildroot}%{_mandir}/man1/
@@ -387,6 +386,10 @@ mkdir -p %{buildroot}%{_udevrulesdir}
 mkdir -p %{buildroot}%{_modprobe_d}/
 mkdir -p %{buildroot}%{_dracut_conf_d}/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
+
+%ifarch x86_64
+mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
+%endif
 
 %if 0%{?is_grid} == 1
 mkdir -p %{buildroot}%{_libdir}/nvidia/
@@ -490,7 +493,9 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %endif
 
 # NGX Proton/Wine library
+%ifarch x86_64
 cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
+%endif
 
 # GRID utility
 %if 0%{?is_grid} == 1
