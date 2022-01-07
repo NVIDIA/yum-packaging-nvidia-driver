@@ -540,9 +540,6 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libnvidia-opticalflow.so.%{version}
 %ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-compiler.so.%{version}
-%ifnarch %{ix86}
-%{_libdir}/libnvidia-compiler-next.so.%{version}
-%endif
 %endif
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
