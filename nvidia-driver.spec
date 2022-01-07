@@ -26,6 +26,7 @@ Source10:       99-nvidia-modules.conf
 Source11:       10-nvidia-driver.conf
 # For servers with OutputClass device options
 Source12:       10-nvidia.conf
+Source13:       alternate-install-present
 
 Source40:       com.nvidia.driver.metainfo.xml
 Source41:       parse-supported-gpus.py
@@ -322,6 +323,10 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 
 %endif
 
+# alternate-install-present file triggers runfile warning
+install -m 0755 -d %{buildroot}/usr/lib/nvidia/
+install -p -m 0644 %{SOURCE13} %{buildroot}/usr/lib/nvidia/
+
 # gsp.bin
 install -m 0755 -d %{buildroot}/lib/firmware/nvidia/%{version}/
 %ifarch x86_64 aarch64
@@ -439,6 +444,7 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
 /lib/firmware/nvidia/%{version}
+/usr/lib/nvidia/
 
 # nvidia-powerd
 %ifarch x86_64 aarch64 ppc64le
