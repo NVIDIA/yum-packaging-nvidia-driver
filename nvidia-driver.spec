@@ -231,9 +231,9 @@ ln -sf libcuda.so.%{version} libcuda.so
 # Required for building additional applications agains the driver stack
 ln -sf libnvidia-ml.so.%{version}               libnvidia-ml.so
 ln -sf libnvidia-ptxjitcompiler.so.%{version}   libnvidia-ptxjitcompiler.so
+ln -sf libnvidia-nvvm.so.%{version}             libnvidia-nvvm.so
 %ifnarch %{ix86}
 ln -sf libnvidia-cfg.so.%{version}              libnvidia-cfg.so
-ln -sf libnvidia-nvvm.so.4.0.0                  libnvidia-nvvm.so
 %endif
 %ifnarch ppc64le
 ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
@@ -475,9 +475,9 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libnvidia-encode.so
 %{_libdir}/libnvidia-ml.so
 %{_libdir}/libnvidia-ptxjitcompiler.so
+%{_libdir}/libnvidia-nvvm.so
 %ifnarch %{ix86}
 %{_libdir}/libnvidia-cfg.so
-%{_libdir}/libnvidia-nvvm.so
 %endif
 %ifnarch ppc64le
 %{_libdir}/libnvidia-fbc.so
@@ -545,10 +545,7 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
-%ifnarch %{ix86}
-%{_libdir}/libnvidia-nvvm.so.4
-%{_libdir}/libnvidia-nvvm.so.4.0.0
-%endif
+%{_libdir}/libnvidia-nvvm.so.%{version}
 
 %files NvFBCOpenGL
 %ifnarch ppc64le
