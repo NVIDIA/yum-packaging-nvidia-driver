@@ -62,6 +62,7 @@ Source10:       99-nvidia-modules.conf
 Source11:       10-nvidia-driver.conf
 # For servers with OutputClass device options
 Source12:       10-nvidia.conf
+Source13:       alternate-install-present
 
 Source20:       nvidia.conf
 Source21:       60-nvidia-drm.rules
@@ -474,6 +475,10 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 # https://github.com/negativo17/nvidia-driver/issues/27
 install -p -m 644 %{SOURCE21} %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
+# alternate-install-present file triggers runfile warning
+install -m 0755 -d %{buildroot}/usr/lib/nvidia/
+install -p -m 0644 %{SOURCE13} %{buildroot}/usr/lib/nvidia/
+
 # gsp.bin
 install -m 0755 -d %{buildroot}/lib/firmware/nvidia/%{version}/
 install -p -m 0644 firmware/gsp.bin %{buildroot}/lib/firmware/nvidia/%{version}/
@@ -615,6 +620,7 @@ fi ||:
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
 /lib/firmware/nvidia/%{version}
+/usr/lib/nvidia/
 
 # nvidia-powerd
 %config(noreplace) %{_dbus_systemd_dir}/nvidia-dbus.conf
