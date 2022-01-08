@@ -324,8 +324,10 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 %endif
 
 # alternate-install-present file triggers runfile warning
+%ifnarch %{ix86}
 install -m 0755 -d %{buildroot}/usr/lib/nvidia/
 install -p -m 0644 %{SOURCE13} %{buildroot}/usr/lib/nvidia/
+%endif
 
 # gsp.bin
 install -m 0755 -d %{buildroot}/lib/firmware/nvidia/%{version}/
@@ -444,7 +446,9 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
 /lib/firmware/nvidia/%{version}
-/usr/lib/nvidia/
+%ifnarch %{ix86}
+/usr/lib/nvidia/alternate-install-present
+%endif
 
 # nvidia-powerd
 %ifarch x86_64 aarch64 ppc64le
