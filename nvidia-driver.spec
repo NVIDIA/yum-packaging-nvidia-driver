@@ -476,8 +476,10 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 install -p -m 644 %{SOURCE21} %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
 # alternate-install-present file triggers runfile warning
+%ifnarch %{ix86}
 install -m 0755 -d %{buildroot}/usr/lib/nvidia/
 install -p -m 0644 %{SOURCE13} %{buildroot}/usr/lib/nvidia/
+%endif
 
 # gsp.bin
 install -m 0755 -d %{buildroot}/lib/firmware/nvidia/%{version}/
@@ -620,7 +622,9 @@ fi ||:
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
 /lib/firmware/nvidia/%{version}
-/usr/lib/nvidia/
+%ifnarch %{ix86}
+/usr/lib/nvidia/alternate-install-present
+%endif
 
 # nvidia-powerd
 %config(noreplace) %{_dbus_systemd_dir}/nvidia-dbus.conf
