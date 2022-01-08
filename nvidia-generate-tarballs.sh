@@ -48,12 +48,15 @@ cp -f *.json* 32/
 
 cd ..
 
-KMOD=nvidia-kmod-${VERSION}-x86_64
+KMOD_OPEN=nvidia-open-kmod-${VERSION}-x86_64
+KMOD_LEGACY=nvidia-kmod-${VERSION}-x86_64
 USR_64=nvidia-driver-${VERSION}-x86_64
 USR_32=nvidia-driver-${VERSION}-i386
 
-mkdir ${KMOD} ${USR_64} ${USR_32}
-mv ${TEMP_UNPACK}/kernel ${KMOD}/
+mkdir ${KMOD_OPEN} ${KMOD_LEGACY} ${USR_64} ${USR_32}
+[[ -d "${TEMP_UNPACK}/kernel-open" ]] &&
+mv ${TEMP_UNPACK}/kernel-open ${KMOD_OPEN}/
+mv ${TEMP_UNPACK}/kernel ${KMOD_LEGACY}/
 mv ${TEMP_UNPACK}/32/* ${USR_32}/
 mv ${TEMP_UNPACK}/* ${USR_64}/
 
@@ -61,10 +64,10 @@ rm -fr ${TEMP_UNPACK}
 
 printf "OK\n"
 
-for tarball in ${KMOD} ${USR_32} ${USR_64}; do
+for tarball in ${KMOD_OPEN} ${KMOD_LEGACY} ${USR_32} ${USR_64}; do
 
     printf "Creating tarball $tarball... "
-
+    [[ -d "$tarball" ]] &&
     tar --remove-files -cJf $tarball.tar.xz $tarball
 
     printf "OK\n"

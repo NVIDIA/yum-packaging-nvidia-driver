@@ -22,9 +22,10 @@ extract_run_file() {
 create_tarball() {
     printf "Creating tarballs for ${VERSION} ${ARCH}... "
 
-    KMOD=nvidia-kmod-${VERSION}-${ARCH}
+    KMOD_OPEN=nvidia-open-kmod-${VERSION}-${ARCH}
+    KMOD_LEGACY=nvidia-kmod-${VERSION}-${ARCH}
     DRIVER=nvidia-driver-${VERSION}-${ARCH}
-    mkdir ${KMOD} ${DRIVER}
+    mkdir ${KMOD_OPEN} ${KMOD_LEGACY} ${DRIVER}
 
     cd ${TEMP_UNPACK}
 
@@ -49,13 +50,21 @@ create_tarball() {
     # useless on modern distributions
     rm -f libnvidia-wfb*
 
-    mv kernel ../${KMOD}/
+    if [[ -d "kernel-open" ]]; then
+        mv kernel-open ../${KMOD_OPEN}/
+    else
+        rmdir ../${KMOD_OPEN}/
+    fi
+
+    mv kernel ../${KMOD_LEGACY}/
     mv * ../${DRIVER}/
 
     cd ..
     rm -fr ${TEMP_UNPACK}
 
-    tar --remove-files -cJf ${KMOD}.tar.xz ${KMOD}
+    [[ -d ${KMOD_OPEN} ]] &&
+    tar --remove-files -cJf ${KMOD_OPEN}.tar.xz ${KMOD_OPEN}
+    tar --remove-files -cJf ${KMOD_LEGACY}.tar.xz ${KMOD_LEGACY}
     tar --remove-files -cJf ${DRIVER}.tar.xz ${DRIVER}
 
     printf "OK\n"
