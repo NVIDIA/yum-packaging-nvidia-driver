@@ -736,6 +736,9 @@ fi ||:
 %ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-compiler.so.%{version}
 %endif
+%ifnarch %{ix86}
+%{_libdir}/libnvidia-wayland-client.so.%{version}
+%endif
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
 %{_libdir}/libnvidia-opticalflow.so.1
