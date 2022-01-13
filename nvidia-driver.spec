@@ -1,6 +1,9 @@
 %global debug_package %{nil}
 %global __strip /bin/true
 
+%global _dbus_systemd_dir %{_sysconfdir}/dbus-1/system.d
+%global _systemd_util_dir %{_libdir}/systemd
+
 %if 0%{?rhel}
 %global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
@@ -25,7 +28,7 @@ Source11:       10-nvidia-driver.conf
 Source12:       10-nvidia.conf
 
 Source40:       com.nvidia.driver.metainfo.xml
-Source41:       parse-readme.py
+Source41:       parse-supported-gpus.py
 
 Source99:       nvidia-generate-tarballs.sh
 Source100:      nvidia-generate-tarballs-ppc64le.sh
@@ -33,7 +36,7 @@ Source101:      nvidia-generate-tarballs-aarch64.sh
 
 %ifarch x86_64 aarch64 ppc64le
 
-%if 0%{?rhel} == 8
+%if 0%{?rhel} >= 8
 BuildRequires:  platform-python
 %else
 BuildRequires:  python2
@@ -160,7 +163,6 @@ remote graphics scenarios.
 %package NVML
 Summary:        NVIDIA Management Library (NVML)
 Requires(post): ldconfig
-Requires:       nvidia-driver%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Provides:       cuda-nvml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description NVML
@@ -227,13 +229,11 @@ ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 ln -sf libcuda.so.%{version} libcuda.so
 
 # Required for building additional applications agains the driver stack
-ln -sf libnvidia-cfg.so.%{version}              libnvidia-cfg.so
 ln -sf libnvidia-ml.so.%{version}               libnvidia-ml.so
 ln -sf libnvidia-ptxjitcompiler.so.%{version}   libnvidia-ptxjitcompiler.so
-ln -sf libnvidia-nvvm.so.4.0.0                  libnvidia-nvvm.so.4
-ln -sf libnvidia-nvvm.so.4                      libnvidia-nvvm.so
-%ifnarch ppc64le aarch64
-ln -sf libnvidia-ifr.so.%{version}              libnvidia-ifr.so
+%ifnarch %{ix86}
+ln -sf libnvidia-cfg.so.%{version}              libnvidia-cfg.so
+ln -sf libnvidia-nvvm.so.4.0.0                  libnvidia-nvvm.so
 %endif
 %ifnarch ppc64le
 ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
@@ -258,12 +258,18 @@ mkdir -p %{buildroot}%{_libdir}/vdpau/
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
+mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/extensions/
 mkdir -p %{buildroot}%{_mandir}/man1/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
+
+mkdir -p %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
+mkdir -p %{buildroot}%{_unitdir}/
+mkdir -p %{buildroot}%{_systemd_util_dir}/system-sleep/
+mkdir -p %{buildroot}%{_dbus_systemd_dir}/
 
 %if 0%{?rhel}
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
@@ -279,6 +285,10 @@ install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 # Binaries
 install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh} %{buildroot}%{_bindir}
 
+%ifarch x86_64
+install -p -m 0755 nvidia-powerd %{buildroot}%{_bindir}
+%endif
+
 # Man pages
 install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1/
 
@@ -286,11 +296,7 @@ install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1
 # install AppData and add modalias provides
 install -p -m 0644 %{SOURCE40} %{buildroot}%{_datadir}/appdata/
 fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
-%{SOURCE41} README.txt "NVIDIA GEFORCE GPUS" | xargs appstream-util add-provide ${fn} modalias
-%{SOURCE41} README.txt "NVIDIA RTX/QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
-%{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
-%{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
-%{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} supported-gpus/supported-gpus.json | xargs appstream-util add-provide ${fn} modalias
 %endif
 
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
@@ -318,7 +324,7 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 
 # gsp.bin
 install -m 0755 -d %{buildroot}/lib/firmware/nvidia/%{version}/
-%ifarch x86_64
+%ifarch x86_64 aarch64
 install -p -m 0644 firmware/gsp.bin %{buildroot}/lib/firmware/nvidia/%{version}/
 %endif
 
@@ -326,11 +332,16 @@ install -p -m 0644 firmware/gsp.bin %{buildroot}/lib/firmware/nvidia/%{version}/
 install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 
+# NGX Proton/Wine library
+%ifarch x86_64
+cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
+%endif
+
 # Unique libraries
 cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
 cp -a libnvcuvid.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
-%ifnarch ppc64le
+%ifarch x86_64 aarch64
 cp -a libnvoptix.so* %{buildroot}%{_libdir}/
 %endif
 
@@ -341,14 +352,40 @@ install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
+%ifarch x86_64 aarch64 ppc64le
+install -p -m 0644 nvidia-dbus.conf %{buildroot}%{_dbus_systemd_dir}/
+%endif
+
+# Systemd units and script for suspending/resuming
+%ifnarch %{ix86}
+install -p -m 0644 systemd/system/nvidia-hibernate.service %{buildroot}%{_unitdir}/
+install -p -m 0644 systemd/system/nvidia-powerd.service %{buildroot}%{_unitdir}/
+install -p -m 0644 systemd/system/nvidia-resume.service %{buildroot}%{_unitdir}/
+install -p -m 0644 systemd/system/nvidia-suspend.service %{buildroot}%{_unitdir}/
+install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
+install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/system-sleep/
+%endif
 
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
-%postun
-%systemd_postun nvidia-fallback.service
+%post
+%systemd_post nvidia-hibernate.service
+%systemd_post nvidia-powerd.service
+%systemd_post nvidia-resume.service
+%systemd_post nvidia-suspend.service
+
+%preun
+%systemd_preun nvidia-fallback.service
 %systemd_preun nvidia-hibernate.service
+%systemd_preun nvidia-powerd.service
 %systemd_preun nvidia-resume.service
 %systemd_preun nvidia-suspend.service
+
+%postun
+%systemd_postun nvidia-hibernate.service
+%systemd_postun nvidia-powerd.service
+%systemd_postun nvidia-resume.service
+%systemd_postun nvidia-suspend.service
 %endif
 
 %if 0%{?fedora} >= 28
@@ -378,6 +415,8 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %postun NVML -p /sbin/ldconfig
 %endif
 
+%ifnarch %{ix86}
+
 %files
 %if 0%{?rhel} == 6
 %doc LICENSE
@@ -393,7 +432,18 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_datadir}/nvidia
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
+%{_bindir}/nvidia-sleep.sh
+%{_systemd_util_dir}/system-sleep/nvidia
+%{_unitdir}/nvidia-hibernate.service
+%{_unitdir}/nvidia-powerd.service
+%{_unitdir}/nvidia-resume.service
+%{_unitdir}/nvidia-suspend.service
 /lib/firmware/nvidia/%{version}
+
+# nvidia-powerd
+%ifarch x86_64 aarch64 ppc64le
+%config(noreplace) %{_dbus_systemd_dir}/nvidia-dbus.conf
+%endif
 
 # X.org configuration files
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
@@ -410,20 +460,24 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_bindir}/nvidia-cuda-mps-control
 %{_bindir}/nvidia-cuda-mps-server
 %{_bindir}/nvidia-debugdump
+%ifarch x86_64
+%{_bindir}/nvidia-powerd
+%endif
 %{_bindir}/nvidia-smi
 %{_mandir}/man1/nvidia-cuda-mps-control.1.*
 %{_mandir}/man1/nvidia-smi.*
+
+%endif
 
 %files devel
 %{_includedir}/nvidia/
 %{_libdir}/libnvcuvid.so
 %{_libdir}/libnvidia-encode.so
-%{_libdir}/libnvidia-cfg.so
 %{_libdir}/libnvidia-ml.so
 %{_libdir}/libnvidia-ptxjitcompiler.so
+%ifnarch %{ix86}
+%{_libdir}/libnvidia-cfg.so
 %{_libdir}/libnvidia-nvvm.so
-%ifnarch ppc64le aarch64
-%{_libdir}/libnvidia-ifr.so
 %endif
 %ifnarch ppc64le
 %{_libdir}/libnvidia-fbc.so
@@ -446,12 +500,6 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libGLESv2_nvidia.so.%{version}
 %{_libdir}/libGLX_nvidia.so.0
 %{_libdir}/libGLX_nvidia.so.%{version}
-%ifarch x86_64 aarch64
-%{_libdir}/libnvidia-cbl.so.%{version}
-%{_libdir}/libnvidia-rtcore.so.%{version}
-%{_libdir}/libnvoptix.so.1
-%{_libdir}/libnvoptix.so.%{version}
-%endif
 %ifarch x86_64 ppc64le aarch64
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
@@ -461,14 +509,15 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-glsi.so.%{version}
 %ifarch x86_64 aarch64
 # Raytracing
-%{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
-%endif
-%ifarch x86_64
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
+%endif
+# Wine libraries
+%ifarch x86_64
+%{_libdir}/nvidia/wine/*.dll
 %endif
 %if 0%{?fedora} || 0%{?rhel} >= 7
 %{_libdir}/libnvidia-glvkspirv.so.%{version}
@@ -491,22 +540,23 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-opticalflow.so.%{version}
 %ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-compiler.so.%{version}
+%ifnarch %{ix86}
+%{_libdir}/libnvidia-compiler-next.so.%{version}
+%endif
 %endif
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
+%ifnarch %{ix86}
 %{_libdir}/libnvidia-nvvm.so.4
 %{_libdir}/libnvidia-nvvm.so.4.0.0
+%endif
 
 %files NvFBCOpenGL
 %ifnarch ppc64le
 %{_libdir}/libnvidia-fbc.so.1
 %{_libdir}/libnvidia-fbc.so.%{version}
-%endif
-%ifnarch ppc64le aarch64
-%{_libdir}/libnvidia-ifr.so.1
-%{_libdir}/libnvidia-ifr.so.%{version}
 %endif
 
 %files NVML
