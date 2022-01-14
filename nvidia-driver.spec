@@ -544,21 +544,21 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libcuda.so.%{version}
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
-%{_libdir}/libnvidia-encode.so.1
-%{_libdir}/libnvidia-encode.so.%{version}
-%{_libdir}/libnvidia-opticalflow.so.1
-%{_libdir}/libnvidia-opticalflow.so.%{version}
 %ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-compiler.so.%{version}
-%ifnarch %{ix86}
-%{_libdir}/libnvidia-wayland-client.so.%{version}
 %endif
-%endif
+%{_libdir}/libnvidia-encode.so.1
+%{_libdir}/libnvidia-encode.so.%{version}
+%{_libdir}/libnvidia-nvvm.so.%{version}
+%{_libdir}/libnvidia-opticalflow.so.1
+%{_libdir}/libnvidia-opticalflow.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
-%{_libdir}/libnvidia-nvvm.so.%{version}
+%ifnarch %{ix86}
+%{_libdir}/libnvidia-wayland-client.so.%{version}
+%endif
 
 %files NvFBCOpenGL
 %ifnarch ppc64le
