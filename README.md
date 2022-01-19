@@ -7,7 +7,9 @@
 
 Packaging templates for `yum` and `dnf` based Linux distros to build NVIDIA driver packages.
 
-The `main` branch contains this README. The `.spec`, `.conf`, and `.sh` files can be found in the appropriate [rhel7](../../tree/rhel7), [rhel8](../../tree/rhel8), and [fedora](../../tree/fedora) branches.
+The `main` branch contains this README. The `.spec`, `.conf`, and `.sh` files can be found in the [rhel7](../../tree/rhel7), [rhel8](../../tree/rhel8), and [fedora](../../tree/fedora) virtual branches.
+
+> _note:_ Virtual branches point to the highest available driver branch. Please use the appropriate `XXX-rhel7` (RHEL7-like) or `XXX` (Fedora/RHEL8-like) git branch to package older driver major versions.
 
 ## Table of Contents
 
@@ -134,11 +136,13 @@ To use the precompiled flavors `latest` and `branch-XXX`, use [yum-packaging-pre
 
 ### Clone this git repository:
 
-Supported branches: `rhel7`, `rhel8` & `fedora`
+Virtual branches: `rhel7`, `rhel8` & `fedora` point to the latest branch
+Supported branches: `XXX-rhel7` (RHEL7-like) and `XXX` (Fedora/RHEL8-like)
 
 ```shell
 git clone -b ${branch} https://github.com/NVIDIA/yum-packaging-nvidia-driver
-> ex: git clone -b rhel8 https://github.com/NVIDIA/yum-packaging-nvidia-driver
+> ex: git clone -b 510 https://github.com/NVIDIA/yum-packaging-nvidia-driver
+> ex: git clone -b 470-rhel7 https://github.com/NVIDIA/yum-packaging-nvidia-driver
 ```
 
 ### Install build dependencies
