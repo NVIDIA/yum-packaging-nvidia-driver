@@ -269,7 +269,6 @@ mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 mkdir -p %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
 mkdir -p %{buildroot}%{_unitdir}/
 mkdir -p %{buildroot}%{_systemd_util_dir}/system-sleep/
-mkdir -p %{buildroot}%{_dbus_systemd_dir}/
 
 %if 0%{?rhel}
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
@@ -286,6 +285,7 @@ install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh} %{buildroot}%{_bindir}
 
 %ifarch x86_64
+mkdir -p %{buildroot}%{_dbus_systemd_dir}/
 install -p -m 0755 nvidia-powerd %{buildroot}%{_bindir}
 %endif
 
@@ -352,14 +352,14 @@ install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
-%ifarch x86_64 aarch64 ppc64le
+%ifarch x86_64
 install -p -m 0644 nvidia-dbus.conf %{buildroot}%{_dbus_systemd_dir}/
+install -p -m 0644 systemd/system/nvidia-powerd.service %{buildroot}%{_unitdir}/
 %endif
 
 # Systemd units and script for suspending/resuming
 %ifnarch %{ix86}
 install -p -m 0644 systemd/system/nvidia-hibernate.service %{buildroot}%{_unitdir}/
-install -p -m 0644 systemd/system/nvidia-powerd.service %{buildroot}%{_unitdir}/
 install -p -m 0644 systemd/system/nvidia-resume.service %{buildroot}%{_unitdir}/
 install -p -m 0644 systemd/system/nvidia-suspend.service %{buildroot}%{_unitdir}/
 install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
@@ -370,22 +370,31 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %post
 %systemd_post nvidia-hibernate.service
-%systemd_post nvidia-powerd.service
 %systemd_post nvidia-resume.service
 %systemd_post nvidia-suspend.service
+
+%ifarch x86_64
+%systemd_post nvidia-powerd.service
+%endif
 
 %preun
 %systemd_preun nvidia-fallback.service
 %systemd_preun nvidia-hibernate.service
-%systemd_preun nvidia-powerd.service
 %systemd_preun nvidia-resume.service
 %systemd_preun nvidia-suspend.service
 
+%ifarch x86_64
+%systemd_preun nvidia-powerd.service
+%endif
+
 %postun
 %systemd_postun nvidia-hibernate.service
-%systemd_postun nvidia-powerd.service
 %systemd_postun nvidia-resume.service
 %systemd_postun nvidia-suspend.service
+
+%ifarch x86_64
+%systemd_postun nvidia-powerd.service
+%endif
 %endif
 
 %if 0%{?fedora} >= 28
@@ -435,13 +444,13 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_bindir}/nvidia-sleep.sh
 %{_systemd_util_dir}/system-sleep/nvidia
 %{_unitdir}/nvidia-hibernate.service
-%{_unitdir}/nvidia-powerd.service
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
 /lib/firmware/nvidia/%{version}
 
 # nvidia-powerd
-%ifarch x86_64 aarch64 ppc64le
+%ifarch x86_64
+%{_unitdir}/nvidia-powerd.service
 %config(noreplace) %{_dbus_systemd_dir}/nvidia-dbus.conf
 %endif
 
