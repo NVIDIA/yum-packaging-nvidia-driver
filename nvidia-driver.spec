@@ -359,6 +359,7 @@ install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
+# nvidia-powerd
 %ifarch x86_64
 install -p -m 0644 nvidia-dbus.conf %{buildroot}%{_dbus_systemd_dir}/
 install -p -m 0644 systemd/system/nvidia-powerd.service %{buildroot}%{_unitdir}/
@@ -565,7 +566,7 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
-%ifnarch %{ix86}
+%ifarch x86_64 aarch64
 %{_libdir}/libnvidia-wayland-client.so.%{version}
 %endif
 
