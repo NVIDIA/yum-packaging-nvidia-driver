@@ -745,13 +745,14 @@ fi ||:
 %endif
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
+%{_libdir}/libnvidia-nvvm.so.4
+%{_libdir}/libnvidia-nvvm.so.%{version}
 %{_libdir}/libnvidia-opticalflow.so.1
 %{_libdir}/libnvidia-opticalflow.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
-%{_libdir}/libnvidia-nvvm.so.%{version}
 
 %files NvFBCOpenGL
 %ifnarch ppc64le aarch64
