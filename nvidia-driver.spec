@@ -754,6 +754,7 @@ fi ||:
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
+%{_libdir}/libnvidia-vulkan-producer.so.%{version}
 
 %files NvFBCOpenGL
 %ifnarch ppc64le aarch64
