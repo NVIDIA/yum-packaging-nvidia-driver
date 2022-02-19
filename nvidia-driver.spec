@@ -707,6 +707,7 @@ fi ||:
 %endif
 # Wine libraries
 %ifarch x86_64
+%dir %{_libdir}/nvidia/wine
 %{_libdir}/nvidia/wine/*.dll
 %endif
 %ifarch x86_64 ppc64le aarch64
