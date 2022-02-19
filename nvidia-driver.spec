@@ -568,7 +568,9 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
+%ifnarch %{ix86}
 %{_libdir}/libnvidia-vulkan-producer.so.%{version}
+%endif
 %ifarch x86_64
 %{_libdir}/libnvidia-wayland-client.so.%{version}
 %endif
