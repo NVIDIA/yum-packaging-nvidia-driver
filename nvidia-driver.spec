@@ -537,6 +537,7 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %endif
 # Wine libraries
 %ifarch x86_64
+%dir %{_libdir}/nvidia/wine
 %{_libdir}/nvidia/wine/*.dll
 %endif
 %if 0%{?fedora} || 0%{?rhel} >= 7
