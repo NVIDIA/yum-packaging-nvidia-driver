@@ -173,6 +173,18 @@ and the SDK provides the appropriate header, stub libraries and sample
 applications. Each new version of NVML is backwards compatible and is intended
 to be a platform for building 3rd party applications.
 
+# GRID vGPU support
+%if 0%{?is_grid} == 1
+%package -n nvidia-grid-utils
+Summary:        NVIDIA driver GRID utilities
+Requires(post): ldconfig
+%endif
+
+%if 0%{?is_grid} == 1
+%description -n nvidia-grid-utils
+NVIDIA driver GRID utilities
+%endif
+
 %package cuda
 Summary:        CUDA integration for %{name}
 Conflicts:      xorg-x11-drv-nvidia-cuda
@@ -270,6 +282,18 @@ mkdir -p %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
 mkdir -p %{buildroot}%{_unitdir}/
 mkdir -p %{buildroot}%{_systemd_util_dir}/system-sleep/
 
+%if 0%{?is_grid} == 1
+mkdir -p %{buildroot}%{_libdir}/nvidia/
+mkdir -p %{buildroot}%{_libdir}/nvidia/systemd/
+%ifarch x86_64
+mkdir -p %{buildroot}%{_libdir}/nvidia/gridd/
+%endif
+%endif
+
+%ifarch x86_64
+mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
+%endif
+
 %if 0%{?rhel}
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 %endif
@@ -366,6 +390,20 @@ install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
 install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/system-sleep/
 %endif
 
+%if 0%{?is_grid} == 1
+cp -a gridd.conf.template %{buildroot}%{_sysconfdir}/nvidia/
+cp -a nvidia-gridd %{buildroot}%{_bindir}/
+cp -a init-scripts/systemd/nvidia-gridd.service %{buildroot}%{_libdir}/nvidia/systemd/
+%ifarch x86_64
+cp -a libFlxComm64.so.* %{buildroot}%{_libdir}/nvidia/gridd/
+cp -a libFlxCore64.so.* %{buildroot}%{_libdir}/nvidia/gridd/
+%endif
+cp -a init-scripts/common.sh %{buildroot}%{_libdir}/nvidia/
+cp -a init-scripts/post-install %{buildroot}%{_libdir}/nvidia/
+cp -a init-scripts/pre-uninstall %{buildroot}%{_libdir}/nvidia/
+cp -a nvidia-gridd.* %{buildroot}%{_mandir}/man1/
+cp -a grid-third-party-licenses.txt %{buildroot}%{_datadir}/nvidia/
+%endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %post
@@ -462,6 +500,22 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
+%endif
+
+%if 0%{?is_grid} == 1
+%files -n nvidia-grid-utils
+%{_sysconfdir}/nvidia/gridd.conf.template
+%{_bindir}/nvidia-gridd
+%{_libdir}/nvidia/systemd/nvidia-gridd.service
+%ifarch x86_64
+%{_libdir}/nvidia/gridd/libFlxComm64.so.*
+%{_libdir}/nvidia/gridd/libFlxCore64.so.*
+%endif
+%{_libdir}/nvidia/common.sh
+%{_libdir}/nvidia/post-install
+%{_libdir}/nvidia/pre-uninstall
+%{_mandir}/man1/nvidia-gridd.*
+%{_datadir}/nvidia/grid-third-party-licenses.txt
 %endif
 
 %files cuda
