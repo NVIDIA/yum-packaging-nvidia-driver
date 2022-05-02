@@ -736,9 +736,9 @@ fi ||:
 %files cuda-libs
 %{_libdir}/libcuda.so
 %{_libdir}/libcuda.so.1
-%{_libdir}/libcudadebugger.so
-%{_libdir}/libcudadebugger.so.1
 %{_libdir}/libcuda.so.%{version}
+%{_libdir}/libcudadebugger.so.1
+%{_libdir}/libcudadebugger.so.%{version}
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
 %ifnarch ppc64le aarch64
