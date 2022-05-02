@@ -492,7 +492,9 @@ install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 # Unique libraries
 cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
 cp -a libnvcuvid.so* %{buildroot}%{_libdir}/
+%ifnarch %{ix86}
 cp -a libcudadebugger.so* %{buildroot}%{_libdir}/
+%endif
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 %ifnarch ppc64le
 cp -a libnvoptix.so* %{buildroot}%{_libdir}/
@@ -737,8 +739,10 @@ fi ||:
 %{_libdir}/libcuda.so
 %{_libdir}/libcuda.so.1
 %{_libdir}/libcuda.so.%{version}
+%ifnarch %{ix86}
 %{_libdir}/libcudadebugger.so.1
 %{_libdir}/libcudadebugger.so.%{version}
+%endif
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
 %ifnarch ppc64le aarch64
