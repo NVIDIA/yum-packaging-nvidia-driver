@@ -553,9 +553,9 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %files cuda-libs
 %{_libdir}/libcuda.so
 %{_libdir}/libcuda.so.1
-%{_libdir}/libcudadebugger.so
-%{_libdir}/libcudadebugger.so.1
 %{_libdir}/libcuda.so.%{version}
+%{_libdir}/libcudadebugger.so.1
+%{_libdir}/libcudadebugger.so.%{version}
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
 %ifnarch ppc64le aarch64
