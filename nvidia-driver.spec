@@ -26,6 +26,7 @@ Source10:       99-nvidia-modules.conf
 Source11:       10-nvidia-driver.conf
 # For servers with OutputClass device options
 Source12:       10-nvidia.conf
+Source13:       alternate-install-present
 
 Source40:       com.nvidia.driver.metainfo.xml
 Source41:       parse-supported-gpus.py
@@ -231,9 +232,9 @@ ln -sf libcuda.so.%{version} libcuda.so
 # Required for building additional applications agains the driver stack
 ln -sf libnvidia-ml.so.%{version}               libnvidia-ml.so
 ln -sf libnvidia-ptxjitcompiler.so.%{version}   libnvidia-ptxjitcompiler.so
+ln -sf libnvidia-nvvm.so.%{version}             libnvidia-nvvm.so
 %ifnarch %{ix86}
 ln -sf libnvidia-cfg.so.%{version}              libnvidia-cfg.so
-ln -sf libnvidia-nvvm.so.4.0.0                  libnvidia-nvvm.so
 %endif
 %ifnarch ppc64le
 ln -sf libnvidia-fbc.so.%{version}              libnvidia-fbc.so
@@ -322,6 +323,12 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 
 %endif
 
+# alternate-install-present file triggers runfile warning
+%ifnarch %{ix86}
+install -m 0755 -d %{buildroot}/usr/lib/nvidia/
+install -p -m 0644 %{SOURCE13} %{buildroot}/usr/lib/nvidia/
+%endif
+
 # gsp.bin
 install -m 0755 -d %{buildroot}/lib/firmware/nvidia/%{version}/
 %ifarch x86_64 aarch64
@@ -352,6 +359,7 @@ install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
+# nvidia-powerd
 %ifarch x86_64
 install -p -m 0644 nvidia-dbus.conf %{buildroot}%{_dbus_systemd_dir}/
 install -p -m 0644 systemd/system/nvidia-powerd.service %{buildroot}%{_unitdir}/
@@ -447,6 +455,9 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
 /lib/firmware/nvidia/%{version}
+%ifnarch %{ix86}
+/usr/lib/nvidia/alternate-install-present
+%endif
 
 # nvidia-powerd
 %ifarch x86_64
@@ -484,9 +495,9 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libnvidia-encode.so
 %{_libdir}/libnvidia-ml.so
 %{_libdir}/libnvidia-ptxjitcompiler.so
+%{_libdir}/libnvidia-nvvm.so
 %ifnarch %{ix86}
 %{_libdir}/libnvidia-cfg.so
-%{_libdir}/libnvidia-nvvm.so
 %endif
 %ifnarch ppc64le
 %{_libdir}/libnvidia-fbc.so
@@ -526,6 +537,7 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %endif
 # Wine libraries
 %ifarch x86_64
+%dir %{_libdir}/nvidia/wine
 %{_libdir}/nvidia/wine/*.dll
 %endif
 %if 0%{?fedora} || 0%{?rhel} >= 7
@@ -543,23 +555,24 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libcuda.so.%{version}
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
-%{_libdir}/libnvidia-encode.so.1
-%{_libdir}/libnvidia-encode.so.%{version}
-%{_libdir}/libnvidia-opticalflow.so.1
-%{_libdir}/libnvidia-opticalflow.so.%{version}
 %ifnarch ppc64le aarch64
 %{_libdir}/libnvidia-compiler.so.%{version}
-%ifnarch %{ix86}
-%{_libdir}/libnvidia-compiler-next.so.%{version}
 %endif
-%endif
+%{_libdir}/libnvidia-encode.so.1
+%{_libdir}/libnvidia-encode.so.%{version}
+%{_libdir}/libnvidia-nvvm.so.4
+%{_libdir}/libnvidia-nvvm.so.%{version}
+%{_libdir}/libnvidia-opticalflow.so.1
+%{_libdir}/libnvidia-opticalflow.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
 %ifnarch %{ix86}
-%{_libdir}/libnvidia-nvvm.so.4
-%{_libdir}/libnvidia-nvvm.so.4.0.0
+%{_libdir}/libnvidia-vulkan-producer.so.%{version}
+%endif
+%ifarch x86_64
+%{_libdir}/libnvidia-wayland-client.so.%{version}
 %endif
 
 %files NvFBCOpenGL

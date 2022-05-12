@@ -26,7 +26,6 @@ rm -f \
     libGLESv1_CM.so.* libGLESv2.so.* libGL.la libGLdispatch.so.* libOpenGL.so.* libGLX.so.* libGL.so.1* libEGL.so.1* \
     libnvidia-egl-wayland.so.* \
     libnvidia-egl-gbm.so.* \
-    libnvidia-vulkan-producer.so.* \
     libOpenCL.so.1* \
     32/libGLESv1_CM.so.* 32/libGLESv2.so.* 32/libGL.la 32/libGLdispatch.so.* 32/libOpenGL.so.* 32/libGLX.so.* 32/libGL.so.1* 32/libEGL.so.1* \
     32/libOpenCL.so.1*
@@ -47,12 +46,15 @@ cp -f *.json* 32/
 
 cd ..
 
-KMOD=nvidia-kmod-${VERSION}-x86_64
+KMOD_OPEN=nvidia-open-kmod-${VERSION}-x86_64
+KMOD_LEGACY=nvidia-kmod-${VERSION}-x86_64
 USR_64=nvidia-driver-${VERSION}-x86_64
 USR_32=nvidia-driver-${VERSION}-i386
 
-mkdir ${KMOD} ${USR_64} ${USR_32}
-mv ${TEMP_UNPACK}/kernel ${KMOD}/
+mkdir ${KMOD_OPEN} ${KMOD_LEGACY} ${USR_64} ${USR_32}
+[[ -d "${TEMP_UNPACK}/kernel-open" ]] &&
+mv ${TEMP_UNPACK}/kernel-open ${KMOD_OPEN}/
+mv ${TEMP_UNPACK}/kernel ${KMOD_LEGACY}/
 mv ${TEMP_UNPACK}/32/* ${USR_32}/
 mv ${TEMP_UNPACK}/* ${USR_64}/
 
@@ -60,10 +62,10 @@ rm -fr ${TEMP_UNPACK}
 
 printf "OK\n"
 
-for tarball in ${KMOD} ${USR_32} ${USR_64}; do
+for tarball in ${KMOD_OPEN} ${KMOD_LEGACY} ${USR_32} ${USR_64}; do
 
     printf "Creating tarball $tarball... "
-
+    [[ -d "$tarball" ]] &&
     tar --remove-files -cJf $tarball.tar.xz $tarball
 
     printf "OK\n"
