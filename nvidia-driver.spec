@@ -252,6 +252,7 @@ cat nvidia_icd.json > nvidia_icd.%{_target_cpu}.json
 
 mkdir -p %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
+mkdir -p %{buildroot}%{_datadir}/egl/egl_external_platform.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
 
@@ -338,6 +339,13 @@ install -p -m 0644 firmware/gsp.bin %{buildroot}/lib/firmware/nvidia/%{version}/
 # Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
+
+# GBM files
+%ifnarch %{ix86}
+install -p -m 0644 15_nvidia_gbm.json %{buildroot}%{_datadir}/egl/egl_external_platform.d/
+mkdir -p %{buildroot}%{_libdir}/gbm/
+ln -sf %{_libdir}/libnvidia-allocator.so.1 %{buildroot}%{_libdir}/gbm/nvidia-drm_gbm.so
+%endif
 
 # NGX Proton/Wine library
 %ifarch x86_64
@@ -526,6 +534,10 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %ifarch x86_64 ppc64le aarch64
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
+%{_libdir}/libnvidia-egl-gbm.so.1
+%{_libdir}/libnvidia-egl-gbm.so.1.1.0
+%{_libdir}/gbm/nvidia-drm_gbm.so
+%{_datadir}/egl/egl_external_platform.d/15_nvidia_gbm.json
 %endif
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
