@@ -747,9 +747,6 @@ fi ||:
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
 %{_libdir}/libnvidia-allocator.so.1
 %{_libdir}/libnvidia-allocator.so.%{version}
-%ifarch x86_64
-%{_libdir}/libnvidia-pkcs11.so.%{version}
-%endif
 
 %files cuda-libs
 %{_libdir}/libcuda.so
