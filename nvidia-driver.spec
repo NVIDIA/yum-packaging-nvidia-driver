@@ -564,7 +564,9 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
 %{_libdir}/libnvidia-allocator.so.1
 %{_libdir}/libnvidia-allocator.so.%{version}
+%ifnarch %{ix86}
 %{_libdir}/libnvidia-api.so.1
+%endif
 
 %files cuda-libs
 %{_libdir}/libcuda.so
