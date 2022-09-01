@@ -482,9 +482,9 @@ install -m 0755 -d %{buildroot}/usr/lib/nvidia/
 install -p -m 0644 %{SOURCE13} %{buildroot}/usr/lib/nvidia/
 %endif
 
-# gsp.bin
+# gsp.bin files
 install -m 0755 -d %{buildroot}/lib/firmware/nvidia/%{version}/
-install -p -m 0644 firmware/gsp.bin %{buildroot}/lib/firmware/nvidia/%{version}/
+install -p -m 0644 firmware/gsp*.bin %{buildroot}/lib/firmware/nvidia/%{version}/
 
 # Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
@@ -747,6 +747,7 @@ fi ||:
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
 %{_libdir}/libnvidia-allocator.so.1
 %{_libdir}/libnvidia-allocator.so.%{version}
+%{_libdir}/libnvidia-api.so.1
 %ifarch x86_64
 %{_libdir}/libnvidia-pkcs11.so.%{version}
 %endif
