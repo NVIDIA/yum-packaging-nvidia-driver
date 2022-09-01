@@ -747,7 +747,9 @@ fi ||:
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
 %{_libdir}/libnvidia-allocator.so.1
 %{_libdir}/libnvidia-allocator.so.%{version}
+%ifnarch %{ix86}
 %{_libdir}/libnvidia-api.so.1
+%endif
 %ifarch x86_64
 %{_libdir}/libnvidia-pkcs11.so.%{version}
 %endif
