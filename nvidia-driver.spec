@@ -107,6 +107,8 @@ Requires:       libglvnd-opengl%{?_isa} >= 1.0
 Requires:       egl-wayland%{?_isa}
 %ifnarch aarch64 ppc64le
 Requires:       vulkan-loader
+%else
+%global         __requires_exclude ^libvulkan\\.so.*$
 %endif
 %endif
 
