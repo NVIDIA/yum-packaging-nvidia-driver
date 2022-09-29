@@ -551,7 +551,7 @@ cp -a grid-third-party-licenses.txt %{buildroot}%{_datadir}/nvidia/
 %if 0%{?fedora} || 0%{?rhel} >= 7
 . %{_sysconfdir}/default/grub
 if [ -z "${GRUB_CMDLINE_LINUX}" ]; then
-  echo GRUB_CMDLINE_LINUX="%{_dracutopts}" >> %{_sysconfdir}/default/grub
+  echo GRUB_CMDLINE_LINUX=\"%{_dracutopts}\" >> %{_sysconfdir}/default/grub
 else
   for param in %{_dracutopts}; do
     echo ${GRUB_CMDLINE_LINUX} | grep -q $param
