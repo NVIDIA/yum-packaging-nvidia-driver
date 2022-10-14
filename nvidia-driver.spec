@@ -356,6 +356,9 @@ cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
 cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
 cp -a libnvcuvid.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
+%ifnarch %{ix86}
+cp -a libcudadebugger.so* %{buildroot}%{_libdir}/
+%endif
 %ifarch x86_64 aarch64
 cp -a libnvoptix.so* %{buildroot}%{_libdir}/
 %endif
@@ -583,6 +586,8 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
 %ifnarch %{ix86}
 %{_libdir}/libnvidia-vulkan-producer.so.%{version}
+%{_libdir}/libcudadebugger.so.1
+%{_libdir}/libcudadebugger.so.%{version}
 %endif
 %ifarch x86_64
 %{_libdir}/libnvidia-wayland-client.so.%{version}
