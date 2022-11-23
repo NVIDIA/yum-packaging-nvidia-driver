@@ -223,6 +223,9 @@ This package provides the development files of the %{name} package.
 # Create symlinks for shared objects
 ldconfig -vn .
 
+# Force creation of libnvidia-nvvm.so.4 for compatibility
+ln -sf libnvidia-nvvm.so.%{version}             libnvidia-nvvm.so.4
+
 # Required for building gstreamer 1.0 NVENC plugins
 ln -sf libnvidia-encode.so.%{version} libnvidia-encode.so
 # Required for building ffmpeg 3.1 Nvidia CUVID
