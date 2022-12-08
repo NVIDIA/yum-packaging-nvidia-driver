@@ -107,6 +107,8 @@ Requires:       libglvnd-opengl%{?_isa} >= 1.0
 Requires:       egl-wayland%{?_isa}
 %ifnarch aarch64 ppc64le
 Requires:       vulkan-loader
+%else
+%global         __requires_exclude ^libvulkan\\.so.*$
 %endif
 %endif
 
@@ -330,10 +332,10 @@ install -m 0755 -d %{buildroot}/usr/lib/nvidia/
 install -p -m 0644 %{SOURCE13} %{buildroot}/usr/lib/nvidia/
 %endif
 
-# gsp.bin
+# gsp.bin files
 install -m 0755 -d %{buildroot}/lib/firmware/nvidia/%{version}/
 %ifarch x86_64 aarch64
-install -p -m 0644 firmware/gsp.bin %{buildroot}/lib/firmware/nvidia/%{version}/
+install -p -m 0644 firmware/gsp*.bin %{buildroot}/lib/firmware/nvidia/%{version}/
 %endif
 
 # Vulkan and EGL loaders
@@ -564,6 +566,9 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
 %{_libdir}/libnvidia-allocator.so.1
 %{_libdir}/libnvidia-allocator.so.%{version}
+%ifnarch %{ix86}
+%{_libdir}/libnvidia-api.so.1
+%endif
 
 %files cuda-libs
 %{_libdir}/libcuda.so
