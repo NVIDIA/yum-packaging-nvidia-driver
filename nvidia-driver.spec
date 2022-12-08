@@ -573,7 +573,7 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libnvidia-api.so.1
 %endif
 %ifarch x86_64
-%{_libdir}/libnvidia-pkcs11.so.%{version}
+%{_libdir}/libnvidia-pkcs11*.so.%{version}
 %endif
 
 %files cuda-libs
