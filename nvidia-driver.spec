@@ -107,6 +107,8 @@ Requires:       libglvnd-opengl%{?_isa} >= 1.0
 Requires:       egl-wayland%{?_isa}
 %ifnarch aarch64 ppc64le
 Requires:       vulkan-loader
+%else
+%global         __requires_exclude ^libvulkan\\.so.*$
 %endif
 %endif
 
@@ -220,6 +222,9 @@ This package provides the development files of the %{name} package.
 
 # Create symlinks for shared objects
 ldconfig -vn .
+
+# Force creation of libnvidia-nvvm.so.4 for compatibility
+ln -sf libnvidia-nvvm.so.%{version}             libnvidia-nvvm.so.4
 
 # Required for building gstreamer 1.0 NVENC plugins
 ln -sf libnvidia-encode.so.%{version} libnvidia-encode.so
