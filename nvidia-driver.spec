@@ -753,6 +753,9 @@ fi ||:
 %ifnarch %{ix86}
 %{_libdir}/libnvidia-api.so.1
 %endif
+%ifarch x86_64
+%{_libdir}/libnvidia-pkcs11*.so.%{version}
+%endif
 
 %files cuda-libs
 %{_libdir}/libcuda.so
