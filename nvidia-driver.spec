@@ -43,6 +43,8 @@
 %global _dbus_systemd_dir %{_sysconfdir}/dbus-1/system.d
 %endif
 
+%global __requires_exclude_from ^.*pkcs.*$
+
 Name:           %{_basename}-%{_named_version}
 Version:        %{?version}%{?!version:430.14}
 Release:        1%{?dist}
