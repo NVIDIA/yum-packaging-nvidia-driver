@@ -8,6 +8,8 @@
 %global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
 
+%global __requires_exclude_from ^.*pkcs.*$
+
 Name:           nvidia-driver
 Version:        %{?version}%{?!version:430.14}
 Release:        1%{?dist}
