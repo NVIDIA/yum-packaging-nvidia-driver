@@ -605,6 +605,7 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %ifarch x86_64
 %{_libdir}/libnvidia-wayland-client.so.%{version}
 %endif
+%{_libdir}/libnvidia-gpucomp.so.%{version}
 
 %files NvFBCOpenGL
 %ifnarch ppc64le
