@@ -598,7 +598,7 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
 %ifnarch %{ix86}
-%{_libdir}/libnvidia-vulkan-producer.so.%{version}
+%{_libdir}/libnvidia-vulkan-producer.so*
 %{_libdir}/libcudadebugger.so.1
 %{_libdir}/libcudadebugger.so.%{version}
 %endif
