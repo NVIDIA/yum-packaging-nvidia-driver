@@ -368,6 +368,7 @@ cp -a libcudadebugger.so* %{buildroot}%{_libdir}/
 %endif
 %ifarch x86_64 aarch64
 cp -a libnvoptix.so* %{buildroot}%{_libdir}/
+cp -a nvoptix.bin %{buildroot}%{_datadir}/nvidia/
 %endif
 
 # libglvnd indirect entry point and private libglvnd libraries
@@ -554,6 +555,7 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
+%{_datadir}/nvidia/nvoptix.bin
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
 %endif
