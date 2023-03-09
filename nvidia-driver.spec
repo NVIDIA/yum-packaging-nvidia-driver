@@ -511,6 +511,7 @@ cp -a libcudadebugger.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 %ifnarch ppc64le
 cp -a libnvoptix.so* %{buildroot}%{_libdir}/
+cp -a nvoptix.bin %{buildroot}%{_datadir}/nvidia/
 %endif
 
 # libglvnd indirect entry point and private libglvnd libraries
@@ -743,6 +744,7 @@ fi ||:
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
+%{_datadir}/nvidia/nvoptix.bin
 %endif
 %if 0%{?fedora} || 0%{?rhel} >= 7
 %{_libdir}/libnvidia-glvkspirv.so.%{version}
