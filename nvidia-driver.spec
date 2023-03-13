@@ -771,9 +771,6 @@ fi ||:
 %endif
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
-%ifnarch ppc64le aarch64
-%{_libdir}/libnvidia-compiler.so.%{version}
-%endif
 %ifnarch %{ix86}
 %{_libdir}/libnvidia-wayland-client.so.%{version}
 %endif
