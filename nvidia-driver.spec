@@ -787,7 +787,6 @@ fi ||:
 %ifnarch %{ix86}
 %{_libdir}/libnvidia-vulkan-producer.so.%{version}
 %endif
-%{_libdir}/libnvidia-gpucomp.so.%{version}
 
 %files NvFBCOpenGL
 %ifnarch ppc64le aarch64
