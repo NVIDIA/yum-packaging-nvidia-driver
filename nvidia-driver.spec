@@ -521,6 +521,11 @@ install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
+%ifarch x86_64 aarch64
+mkdir -p %{buildroot}%{_datadir}/nvidia/rim
+cp -a *.swidtag %{buildroot}%{_datadir}/nvidia/rim/
+%endif
+
 # NGX Proton/Wine library
 cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
 
@@ -641,6 +646,11 @@ fi ||:
 /lib/firmware/nvidia/%{version}
 %ifnarch %{ix86}
 /usr/lib/nvidia/alternate-install-present
+%endif
+
+%ifnarch ppc64le
+%dir %{_datadir}/nvidia/rim
+%{_datadir}/nvidia/rim/*.swidtag
 %endif
 
 # nvidia-powerd
