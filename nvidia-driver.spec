@@ -8,6 +8,8 @@
 %global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
 
+%global __requires_exclude_from ^.*pkcs.*$
+
 Name:           nvidia-driver
 Version:        %{?version}%{?!version:430.14}
 Release:        1%{?dist}
@@ -366,6 +368,7 @@ cp -a libcudadebugger.so* %{buildroot}%{_libdir}/
 %endif
 %ifarch x86_64 aarch64
 cp -a libnvoptix.so* %{buildroot}%{_libdir}/
+cp -a nvoptix.bin %{buildroot}%{_datadir}/nvidia/
 %endif
 
 # libglvnd indirect entry point and private libglvnd libraries
@@ -373,6 +376,11 @@ cp -a libnvoptix.so* %{buildroot}%{_libdir}/
 cp -a libGLX_indirect.so* %{buildroot}%{_libdir}/
 install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
+%endif
+
+%ifarch x86_64 aarch64
+mkdir -p %{buildroot}%{_datadir}/nvidia/rim
+cp -a *.swidtag %{buildroot}%{_datadir}/nvidia/rim/
 %endif
 
 # nvidia-powerd
@@ -475,6 +483,11 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 /usr/lib/nvidia/alternate-install-present
 %endif
 
+%ifnarch ppc64le
+%dir %{_datadir}/nvidia/rim
+%{_datadir}/nvidia/rim/*.swidtag
+%endif
+
 # nvidia-powerd
 %ifarch x86_64
 %{_unitdir}/nvidia-powerd.service
@@ -552,6 +565,7 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
+%{_datadir}/nvidia/nvoptix.bin
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
 %endif
@@ -572,6 +586,9 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %ifnarch %{ix86}
 %{_libdir}/libnvidia-api.so.1
 %endif
+%ifarch x86_64
+%{_libdir}/libnvidia-pkcs11*.so.%{version}
+%endif
 
 %files cuda-libs
 %{_libdir}/libcuda.so
@@ -579,9 +596,6 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libcuda.so.%{version}
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
-%ifnarch ppc64le aarch64
-%{_libdir}/libnvidia-compiler.so.%{version}
-%endif
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
 %{_libdir}/libnvidia-nvvm.so.4
@@ -593,7 +607,7 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
 %ifnarch %{ix86}
-%{_libdir}/libnvidia-vulkan-producer.so.%{version}
+%{_libdir}/libnvidia-vulkan-producer.so*
 %{_libdir}/libcudadebugger.so.1
 %{_libdir}/libcudadebugger.so.%{version}
 %endif
