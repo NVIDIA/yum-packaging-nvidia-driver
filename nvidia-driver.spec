@@ -288,7 +288,7 @@ install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 # Binaries
 install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh} %{buildroot}%{_bindir}
 
-%ifarch x86_64
+%ifarch x86_64 aarch64
 mkdir -p %{buildroot}%{_dbus_systemd_dir}/
 install -p -m 0755 nvidia-powerd %{buildroot}%{_bindir}
 %endif
@@ -373,13 +373,8 @@ install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
-%ifarch x86_64 aarch64
-mkdir -p %{buildroot}%{_datadir}/nvidia/rim
-cp -a *.swidtag %{buildroot}%{_datadir}/nvidia/rim/
-%endif
-
 # nvidia-powerd
-%ifarch x86_64
+%ifarch x86_64 aarch64
 install -p -m 0644 nvidia-dbus.conf %{buildroot}%{_dbus_systemd_dir}/
 install -p -m 0644 systemd/system/nvidia-powerd.service %{buildroot}%{_unitdir}/
 %endif
@@ -400,17 +395,16 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %systemd_post nvidia-resume.service
 %systemd_post nvidia-suspend.service
 
-%ifarch x86_64
+%ifarch x86_64 aarch64
 %systemd_post nvidia-powerd.service
 %endif
 
 %preun
-%systemd_preun nvidia-fallback.service
 %systemd_preun nvidia-hibernate.service
 %systemd_preun nvidia-resume.service
 %systemd_preun nvidia-suspend.service
 
-%ifarch x86_64
+%ifarch x86_64 aarch64
 %systemd_preun nvidia-powerd.service
 %endif
 
@@ -419,7 +413,7 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %systemd_postun nvidia-resume.service
 %systemd_postun nvidia-suspend.service
 
-%ifarch x86_64
+%ifarch x86_64 aarch64
 %systemd_postun nvidia-powerd.service
 %endif
 %endif
@@ -478,13 +472,8 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 /usr/lib/nvidia/alternate-install-present
 %endif
 
-%ifnarch ppc64le
-%dir %{_datadir}/nvidia/rim
-%{_datadir}/nvidia/rim/*.swidtag
-%endif
-
 # nvidia-powerd
-%ifarch x86_64
+%ifarch x86_64 aarch64
 %{_unitdir}/nvidia-powerd.service
 %config(noreplace) %{_dbus_systemd_dir}/nvidia-dbus.conf
 %endif
@@ -504,7 +493,7 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_bindir}/nvidia-cuda-mps-control
 %{_bindir}/nvidia-cuda-mps-server
 %{_bindir}/nvidia-debugdump
-%ifarch x86_64
+%ifarch x86_64 aarch64
 %{_bindir}/nvidia-powerd
 %endif
 %{_bindir}/nvidia-smi
@@ -548,7 +537,7 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
 %{_libdir}/libnvidia-egl-gbm.so.1
-%{_libdir}/libnvidia-egl-gbm.so.1.1.0
+%{_libdir}/libnvidia-egl-gbm.so.1.1.1
 %{_libdir}/gbm/nvidia-drm_gbm.so
 %{_datadir}/egl/egl_external_platform.d/15_nvidia_gbm.json
 %endif
