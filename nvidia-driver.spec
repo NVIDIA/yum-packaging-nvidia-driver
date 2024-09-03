@@ -39,12 +39,7 @@ Source101:      nvidia-generate-tarballs-aarch64.sh
 
 %ifarch x86_64 aarch64 ppc64le
 
-%if 0%{?rhel} >= 8
-BuildRequires:  platform-python
-%else
-BuildRequires:  python2
-%endif
-
+Requires:       python3
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 # AppStream metadata generation
