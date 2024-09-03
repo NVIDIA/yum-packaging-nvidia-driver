@@ -732,7 +732,7 @@ fi ||:
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
 %{_libdir}/libnvidia-egl-gbm.so.1
-%{_libdir}/libnvidia-egl-gbm.so.1.1.0
+%{_libdir}/libnvidia-egl-gbm.so.1.1.1
 %{_libdir}/gbm/nvidia-drm_gbm.so
 %{_datadir}/egl/egl_external_platform.d/15_nvidia_gbm.json
 %endif
