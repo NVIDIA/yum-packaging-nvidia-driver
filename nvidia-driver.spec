@@ -1,6 +1,7 @@
 %global debug_package %{nil}
 %global __strip /bin/true
 %global __brp_ldconfig %{nil}
+%global _build_id_links none
 
 # systemd 248+
 %if 0%{?rhel} == 8
@@ -8,7 +9,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        %{?version}%{?!version:550.54.14}
+Version:        560.00
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -29,7 +30,6 @@ Source90:       nvidia-generate-tarballs.sh
 Source91:       nvidia-generate-tarballs-aarch64.sh
 
 %ifarch x86_64 aarch64
-Requires:       dnf-plugin-nvidia
 BuildRequires:  libappstream-glib
 BuildRequires:  python3
 BuildRequires:  systemd-rpm-macros
@@ -54,8 +54,9 @@ version %{version}.
 
 %package libs
 Summary:        Libraries for %{name}
-Requires:       egl-gbm%{?_isa} >= 1.1.2
-Requires:       egl-wayland%{?_isa} >= 1.1.13.1
+Requires:       egl-gbm%{?_isa} >= 1.1.2^20240919gitb24587d-3
+Requires:       egl-wayland%{?_isa} >= 1.1.13.1-3
+Requires:       egl-x11%{?_isa} >= 1.0.0^20240916gitf13be94-1
 Requires:       libvdpau%{?_isa} >= 0.5
 Requires:       libglvnd%{?_isa} >= 1.0
 Requires:       libglvnd-egl%{?_isa} >= 1.0
@@ -180,10 +181,6 @@ ln -sf libcuda.so.%{version} libcuda.so
 
 # EGL loader
 install -p -m 0644 -D 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
-
-# EGL external platform
-install -p -m 0644 -D 20_nvidia_xcb.json %{buildroot}%{_datadir}/egl/egl_external_platform.d/20_nvidia_xcb.json
-install -p -m 0644 -D 20_nvidia_xlib.json %{buildroot}%{_datadir}/egl/egl_external_platform.d/20_nvidia_xlib.json
 
 # Vulkan loader
 install -p -m 0644 -D nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
@@ -337,8 +334,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %endif
 
 %files libs
-%{_datadir}/egl/egl_external_platform.d/20_nvidia_xcb.json
-%{_datadir}/egl/egl_external_platform.d/20_nvidia_xlib.json
 %{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
 %{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
 %if 0%{?fedora} || 0%{?rhel} >= 9
@@ -356,8 +351,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-allocator.so.1
 %{_libdir}/libnvidia-allocator.so.%{version}
 %{_libdir}/libnvidia-eglcore.so.%{version}
-%{_libdir}/libnvidia-egl-xcb.so.1
-%{_libdir}/libnvidia-egl-xlib.so.1
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
 %{_libdir}/libnvidia-glvkspirv.so.%{version}

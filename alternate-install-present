@@ -1,7 +1,2 @@
-The NVIDIA proprietary driver is already installed in this system. It was
-installed through a 3d party repository.
-
-Please refer to the following page for additional information and to install
-optional driver components:
-
- http://negativo17.org/nvidia-driver/
+The NVIDIA proprietary driver is already installed in this system.
+It was installed through packages and not with the self extracting executable.
