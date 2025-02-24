@@ -9,7 +9,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        560.00
+Version:        570.00
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -20,24 +20,32 @@ ExclusiveArch:  %{ix86} x86_64 aarch64
 Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
 Source2:        %{name}-%{version}-aarch64.tar.xz
-Source3:        70-nvidia.preset
 Source4:        10-nvidia.conf
 Source5:        alternate-install-present
 Source6:        com.nvidia.driver.metainfo.xml
 Source7:        parse-supported-gpus.py
+# Due to some bugs with the switch from libappstream-glib to appstream, the icon must also be local:
+Source8:        com.nvidia.driver.png
+
+Source9:        70-nvidia-driver.preset
+Source10:       70-nvidia-driver-cuda.preset
 
 Source90:       nvidia-generate-tarballs.sh
 Source91:       nvidia-generate-tarballs-aarch64.sh
 
 %ifarch x86_64 aarch64
 BuildRequires:  libappstream-glib
+%if 0%{?rhel} == 8
+# xml.etree.ElementTree has indent only from 3.9+:
+BuildRequires:  python(abi) >= 3.9
+%else
 BuildRequires:  python3
+%endif
 BuildRequires:  systemd-rpm-macros
 %endif
 
 Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
-Requires:       xorg-x11-server-Xorg%{?_isa}
 
 Provides:       nvidia-drivers
 Conflicts:      nvidia-x11-drv
@@ -140,6 +148,18 @@ Conflicts:      xorg-x11-drv-nvidia-470xx-cuda
 %description cuda
 This package provides the CUDA integration components for %{name}.
 
+%package -n xorg-x11-nvidia
+Summary:        X.org X11 NVIDIA driver and extensions
+Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       xorg-x11-server-Xorg%{?_isa}
+Supplements:    (nvidia-driver and xorg-x11-server-Xorg)
+
+Conflicts:      xorg-x11-drv-nvidia
+Conflicts:      xorg-x11-drv-nvidia-470xx
+
+%description -n xorg-x11-nvidia
+The NVIDIA X.org X11 driver and associated components.
+
 %endif
 
 %prep
@@ -205,9 +225,14 @@ ln -sf ../libnvidia-allocator.so.%{version} %{buildroot}%{_libdir}/gbm/nvidia-dr
 %endif
 
 %ifarch x86_64
+
 # NGX Proton/Wine library
 mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
 cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
+
+# nvsandboxutils configuration
+install -p -m 0644 -D sandboxutils-filelist.json %{buildroot}%{_datadir}/nvidia/files.d/sandboxutils-filelist.json
+
 %endif
 
 %ifarch x86_64 aarch64
@@ -246,7 +271,8 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 install -p -m 0644 nvoptix.bin %{buildroot}%{_datadir}/nvidia/
 
 # Systemd units and script for suspending/resuming
-install -p -m 0644 -D %{SOURCE3} %{buildroot}%{_systemd_util_dir}/system-preset/70-nvidia.preset
+mkdir -p %{buildroot}%{_systemd_util_dir}/system-preset/
+install -p -m 0644 %{SOURCE9} %{SOURCE10} %{buildroot}%{_systemd_util_dir}/system-preset/
 mkdir -p %{buildroot}%{_unitdir}/
 install -p -m 0644 systemd/system/*.service %{buildroot}%{_unitdir}/
 install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
@@ -260,11 +286,15 @@ sed -i -e 's/ExecStart=/ExecStart=-/g' %{buildroot}%{_unitdir}/nvidia-powerd.ser
 # Vulkan layer
 install -p -m 0644 -D nvidia_layers.json %{buildroot}%{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
 
-# install AppData and add modalias provides
+# Install AppData and add modalias provides, do not use appstream-util add-provide as it mangles the xml
 install -p -m 0644 -D %{SOURCE6} %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
-%{SOURCE7} supported-gpus/supported-gpus.json | xargs appstream-util add-provide %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml modalias
+%{SOURCE7} supported-gpus/supported-gpus.json %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
+mkdir -p %{buildroot}%{_datadir}/pixmaps/
+cp %{SOURCE8} %{buildroot}%{_datadir}/pixmaps/
 
 %check
+# Using appstreamcli: appstreamcli validate --strict
+# Icon type local is not supported by appstreamcli for drivers
 appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 
 %endif
@@ -276,18 +306,21 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %systemd_post nvidia-powerd.service
 %systemd_post nvidia-resume.service
 %systemd_post nvidia-suspend.service
+%systemd_post nvidia-suspend-then-hibernate.service
 
 %preun
 %systemd_preun nvidia-hibernate.service
 %systemd_preun nvidia-powerd.service
 %systemd_preun nvidia-resume.service
 %systemd_preun nvidia-suspend.service
+%systemd_preun nvidia-suspend-then-hibernate.service
 
 %postun
 %systemd_postun nvidia-hibernate.service
 %systemd_postun nvidia-powerd.service
 %systemd_postun nvidia-resume.service
 %systemd_postun nvidia-suspend.service
+%systemd_postun nvidia-suspend-then-hibernate.service
 
 %endif
 
@@ -297,7 +330,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %license LICENSE
 %doc NVIDIA_Changelog README.txt html supported-gpus/supported-gpus.json
 %dir %{_sysconfdir}/nvidia
-%config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %{_bindir}/nvidia-bug-report.sh
 %{_bindir}/nvidia-ngx-updater
 %ifarch x86_64
@@ -305,18 +337,23 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %endif
 %{_bindir}/nvidia-powerd
 %{_bindir}/nvidia-sleep.sh
-%{_metainfodir}/com.nvidia.driver.metainfo.xml
 %{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 %{_datadir}/nvidia/nvidia-application-profiles*
-%{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
-%{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_prefix}/lib/nvidia/alternate-install-present
-%{_systemd_util_dir}/system-preset/70-nvidia.preset
+%{_systemd_util_dir}/system-preset/70-nvidia-driver.preset
 %{_systemd_util_dir}/system-sleep/nvidia
 %{_unitdir}/nvidia-hibernate.service
 %{_unitdir}/nvidia-powerd.service
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
+%{_unitdir}/nvidia-suspend-then-hibernate.service
+%{_datadir}/pixmaps/com.nvidia.driver.png
+%{_metainfodir}/com.nvidia.driver.metainfo.xml
+
+%files -n xorg-x11-nvidia
+%config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
+%{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
+%{_libdir}/xorg/modules/drivers/nvidia_drv.so
 
 %files cuda
 %{_sysconfdir}/OpenCL/vendors/*
@@ -326,6 +363,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_bindir}/nvidia-smi
 %{_mandir}/man1/nvidia-cuda-mps-control.1.*
 %{_mandir}/man1/nvidia-smi.*
+%{_systemd_util_dir}/system-preset/70-nvidia-driver-cuda.preset
 
 %files -n libnvidia-cfg
 %{_libdir}/libnvidia-cfg.so.1
@@ -400,11 +438,14 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libcudadebugger.so.%{version}
 %endif
 %ifarch x86_64
+%{_datadir}/nvidia/files.d/sandboxutils-filelist.json
 %if 0%{?rhel} == 8
 %{_libdir}/libnvidia-pkcs11.so.%{version}
 %else
 %{_libdir}/libnvidia-pkcs11-openssl3.so.%{version}
 %endif
+%{_libdir}/libnvidia-sandboxutils.so.1
+%{_libdir}/libnvidia-sandboxutils.so.%{version}
 %endif
 
 %files -n libnvidia-fbc
